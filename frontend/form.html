@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08163A" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Gerar ficha personalizada</title>
+    <link rel="stylesheet" href="./styles/output.css" />
+  </head>
+  <body class="page-shell">
+    <main class="page-main compact-stack max-w-5xl space-y-7 md:space-y-8">
+      <header class="page-header">
+        <h1 class="text-3xl font-extrabold md:text-4xl">Vamos montar sua ficha personalizada</h1>
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <button id="install-app" class="hidden rounded-lg border border-neonGreen/70 px-4 py-2 text-sm font-semibold text-neonGreen">
+            Instalar aplicativo
+          </button>
+          <a href="/" class="w-full rounded-lg border border-white/30 px-4 py-2 text-center text-sm sm:w-auto">Voltar ao início</a>
+        </div>
+      </header>
+
+      <section class="glow-panel p-5 sm:p-6 md:p-9 lg:p-10">
+        <p class="mb-3 text-white/90">Preencha em menos de 1 minuto e receba um plano completo para sua rotina e objetivo.</p>
+        <p class="mb-6 text-sm text-white/75">Quanto mais preciso o preenchimento, mais personalizado será o resultado.</p>
+
+        <form id="workout-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:gap-6">
+          <label class="space-y-2">
+            <span class="text-sm">Idade</span>
+            <input class="input-field" name="idade" type="number" min="14" max="85" required />
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Peso (kg)</span>
+            <input class="input-field" name="peso" type="number" min="35" max="250" step="0.1" required />
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Altura (m)</span>
+            <input
+              class="input-field"
+              id="altura-input"
+              name="altura"
+              type="text"
+              inputmode="decimal"
+              placeholder="Ex.: 1.74"
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Objetivo</span>
+            <select class="input-field" name="objetivo" required>
+              <option value="emagrecimento">Emagrecimento</option>
+              <option value="hipertrofia">Hipertrofia</option>
+              <option value="definicao">Definição</option>
+            </select>
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Nível</span>
+            <select class="input-field" name="nivel" required>
+              <option value="iniciante">Iniciante</option>
+              <option value="intermediario">Intermediário</option>
+              <option value="avancado">Avançado</option>
+            </select>
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Dias por semana</span>
+            <select class="input-field" name="diasSemana" required>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </label>
+
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm">Observações (opcional)</span>
+            <textarea class="input-field min-h-28" name="observacoes" placeholder="Ex.: dores articulares, limitações, experiência prévia..."></textarea>
+          </label>
+
+          <div class="md:col-span-2">
+            <button type="submit" class="neon-button w-full">Gerar meu plano de treino</button>
+            <p class="mt-2 text-center text-xs text-white/70">Seu plano será gerado na hora.</p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="./scripts/form.js"></script>
+    <script src="./scripts/pwa.js"></script>
+  </body>
+</html>

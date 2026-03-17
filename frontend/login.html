@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08163A" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
+    <title>Acesse seu espaço de evolução</title>
+    <link rel="stylesheet" href="./styles/output.css" />
+  </head>
+  <body class="page-shell">
+    <main class="page-main mx-auto max-w-md">
+      <div class="glow-panel p-6 sm:p-8">
+        <h1 class="mb-2 text-2xl font-extrabold">Seu espaço de evolução</h1>
+        <p class="mb-6 text-sm text-white/80">Entre para acompanhar seus planos e manter consistência nos treinos.</p>
+
+        <div class="mb-6 flex gap-2">
+          <button id="tab-login" class="tab-button active flex-1 rounded-lg border border-neonGreen/60 px-4 py-2 text-sm font-semibold text-neonGreen">
+            Entrar
+          </button>
+          <button id="tab-signup" class="tab-button flex-1 rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold">
+            Criar conta
+          </button>
+        </div>
+
+        <section id="login-form" class="space-y-4">
+          <label class="space-y-2">
+            <span class="text-sm">E-mail</span>
+            <input id="login-email" class="input-field" type="email" placeholder="seu@email.com" required />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm">Senha</span>
+            <input id="login-password" class="input-field" type="password" placeholder="••••••••" required />
+          </label>
+          <button id="login-submit" class="neon-button w-full">Entrar na minha conta</button>
+          <p id="login-error" class="hidden text-sm text-red-300"></p>
+        </section>
+
+        <section id="signup-form" class="hidden space-y-4">
+          <label class="space-y-2">
+            <span class="text-sm">E-mail</span>
+            <input id="signup-email" class="input-field" type="email" placeholder="seu@email.com" required />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm">Senha (mín. 6 caracteres)</span>
+            <input id="signup-password" class="input-field" type="password" placeholder="••••••••" minlength="6" required />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm">Confirmar Senha</span>
+            <input id="signup-password-confirm" class="input-field" type="password" placeholder="••••••••" minlength="6" required />
+          </label>
+          <button id="signup-submit" class="neon-button w-full">Criar minha conta</button>
+          <p id="signup-error" class="hidden text-sm text-red-300"></p>
+        </section>
+
+        <div class="mt-6 border-t border-white/20 pt-6">
+          <a href="/" class="block text-center text-sm text-white/70 hover:text-white">Voltar ao início</a>
+        </div>
+      </div>
+    </main>
+
+    <script src="./scripts/pwa.js"></script>
+    <script src="./scripts/api-client.js"></script>
+    <script src="./scripts/auth.js"></script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08163A" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
+    <title>Sua evolução de treinos</title>
+    <link rel="stylesheet" href="./styles/output.css" />
+  </head>
+  <body class="page-shell">
+    <main class="page-main max-w-7xl">
+      <header class="page-header mb-8">
+        <div>
+          <p class="text-sm uppercase tracking-[0.24em] text-neonGreen">Dashboard</p>
+          <h1 class="mt-2 text-3xl font-extrabold md:text-4xl">Sua evolução de treinos</h1>
+        </div>
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <a href="/" class="w-full rounded-lg border border-white/30 px-4 py-2 text-center text-sm sm:w-auto">Voltar ao início</a>
+          <button id="logout-btn" class="w-full rounded-lg border border-red-300/60 px-4 py-2 text-center text-sm font-semibold text-red-300 sm:w-auto">
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <section id="loading" class="glow-panel flex flex-col items-center gap-4 p-8 sm:p-10 md:p-12">
+        <div class="arm-loader"></div>
+        <p class="text-white/90">Carregando seu histórico com carinho...</p>
+      </section>
+
+      <section id="content" class="hidden space-y-8">
+        <div class="glow-panel p-5 sm:p-7 md:p-8">
+          <h2 class="mb-4 text-xl font-bold">Filtros</h2>
+          <div class="grid gap-4 md:grid-cols-3">
+            <label class="space-y-2">
+              <span class="text-sm">Data Inicial</span>
+              <input id="filter-start" class="input-field" type="date" />
+            </label>
+            <label class="space-y-2">
+              <span class="text-sm">Data Final</span>
+              <input id="filter-end" class="input-field" type="date" />
+            </label>
+            <label class="space-y-2">
+              <span class="text-sm">Objetivo</span>
+              <select id="filter-goal" class="input-field">
+                <option value="">Todos</option>
+                <option value="emagrecimento">Emagrecimento</option>
+                <option value="hipertrofia">Hipertrofia</option>
+                <option value="definicao">Definição</option>
+              </select>
+            </label>
+          </div>
+          <button id="apply-filters" class="mt-4 w-full rounded-xl border border-white/30 px-5 py-3 font-semibold sm:w-auto">
+            Aplicar Filtros
+          </button>
+        </div>
+
+        <div id="stats" class="grid gap-4 md:grid-cols-3">
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Total de Planos</p>
+            <p id="stat-total" class="mt-2 text-2xl font-bold text-neonYellow">0</p>
+          </div>
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Última Gerada</p>
+            <p id="stat-latest" class="mt-2 text-sm font-semibold text-neonGreen">-</p>
+          </div>
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Objetivo Mais Comum</p>
+            <p id="stat-common" class="mt-2 text-sm font-semibold text-white">-</p>
+          </div>
+        </div>
+
+        <div class="glow-panel p-5 sm:p-7 md:p-8">
+          <h2 class="mb-4 text-xl font-bold">Planos Gerados</h2>
+          <div id="history-grid" class="grid gap-4 md:grid-cols-2"></div>
+          <p id="no-history" class="text-center text-white/70">Nenhum plano encontrado com os filtros selecionados.</p>
+        </div>
+      </section>
+
+      <section id="unauthorized" class="glow-panel hidden p-8 text-center">
+        <h2 class="text-xl font-bold text-red-300">Acesso negado</h2>
+        <p class="mt-2 text-white/90">Entre na sua conta para acompanhar seus planos e sua evolução.</p>
+        <a href="/entrar" class="mt-4 inline-block rounded-xl border border-neonGreen/60 px-6 py-3 font-semibold text-neonGreen">
+          Ir para o login
+        </a>
+      </section>
+    </main>
+
+    <script src="./scripts/pwa.js"></script>
+    <script src="./scripts/api-client.js"></script>
+    <script src="./scripts/dashboard.js"></script>
+  </body>
+</html>

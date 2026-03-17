@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08163A" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Seu plano personalizado está pronto</title>
+    <link rel="stylesheet" href="./styles/output.css" />
+  </head>
+  <body class="page-shell">
+    <main class="page-main compact-stack max-w-6xl space-y-7 md:space-y-8">
+      <section id="network-status" class="glow-panel hidden p-4 text-sm font-semibold"></section>
+
+      <header class="page-header">
+        <h1 class="text-3xl font-extrabold md:text-4xl">Seu plano personalizado está pronto</h1>
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <button id="install-app" class="hidden rounded-lg border border-neonGreen/70 px-4 py-2 text-sm font-semibold text-neonGreen">
+            Instalar aplicativo
+          </button>
+          <a href="/form" class="w-full rounded-lg border border-white/30 px-4 py-2 text-center text-sm sm:w-auto">Voltar ao formulário</a>
+        </div>
+      </header>
+
+      <section id="loading" class="glow-panel flex flex-col items-center gap-4 p-8 sm:p-10 md:p-12">
+        <div class="arm-loader"></div>
+        <p id="loading-text" class="text-white/90">Estamos preparando um plano pensado para você...</p>
+      </section>
+
+      <section id="result" class="glow-panel neon-stripes hidden p-5 sm:p-7 md:p-9 lg:p-10">
+        <h2 class="mb-2 text-2xl font-bold text-neonGreen">Seu plano exclusivo</h2>
+        <p class="mb-4 text-sm text-white/80">Siga essa estrutura por algumas semanas para perceber sua evolução com mais consistência.</p>
+        <div class="tablet-grid-2 mb-6 grid gap-3 lg:grid-cols-3">
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">IMC</p>
+            <p id="imc-value" class="mt-2 text-xl font-bold text-neonYellow"></p>
+          </div>
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Intensidade</p>
+            <p id="intensity-value" class="mt-2 text-xl font-bold text-neonGreen"></p>
+          </div>
+          <div class="rounded-xl border border-white/20 bg-black/20 p-4 md:col-span-2 lg:col-span-1">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Progressão</p>
+            <p id="progression-value" class="mt-2 text-sm font-semibold text-white"></p>
+          </div>
+        </div>
+        <div id="workout-content" class="space-y-5 text-sm md:text-base"></div>
+        <div class="mt-6">
+          <button id="download-pdf" class="neon-button w-full sm:w-auto">Baixar meu plano em PDF</button>
+        </div>
+      </section>
+
+      <section id="error" class="glow-panel hidden p-5 sm:p-7 md:p-8">
+        <h2 class="text-xl font-bold text-red-300">Não conseguimos gerar seu plano agora</h2>
+        <p id="error-message" class="mt-2 text-white/90">Verifique os dados e tente novamente em instantes.</p>
+        <button id="retry-request" class="mt-4 w-full rounded-xl border border-white/30 px-5 py-3 font-semibold sm:w-auto">
+          Tentar novamente
+        </button>
+      </section>
+
+      <section id="history-section" class="glow-panel hidden p-5 sm:p-7 md:p-8">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-xl font-bold text-neonYellow">Histórico offline</h2>
+          <button id="clear-history" class="w-full rounded-xl border border-white/30 px-4 py-2 text-sm font-semibold sm:w-auto">
+            Limpar histórico
+          </button>
+        </div>
+        <p class="mb-4 text-sm text-white/80">Seus últimos planos ficam salvos no aparelho para você consultar quando quiser, mesmo sem internet.</p>
+        <div id="history-list" class="grid gap-3 md:grid-cols-2"></div>
+      </section>
+    </main>
+
+    <script src="./scripts/api-client.js"></script>
+    <script src="./scripts/result.js"></script>
+    <script src="./scripts/pwa.js"></script>
+  </body>
+</html>

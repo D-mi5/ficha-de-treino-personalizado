@@ -1,0 +1,5 @@
+node_modules/
+backend/dist/
+.env
+frontend/styles/output.css
+npm-debug.log*
