@@ -31,30 +31,8 @@
     return parseJsonResponse(response);
   }
 
-  async function requestBlob(url, options = {}) {
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-      let payload = null;
-      try {
-        payload = await response.json();
-      } catch {
-        payload = null;
-      }
-
-      const message = payload?.error || `HTTP ${response.status}`;
-      const error = new Error(message);
-      error.status = response.status;
-      error.payload = payload;
-      throw error;
-    }
-
-    return response.blob();
-  }
-
   const apiClient = {
     requestJson,
-    requestBlob,
 
     login(email, password) {
       return requestJson("/api/auth/login", {
@@ -80,16 +58,6 @@
       return requestJson("/api/generate-workout", {
         method: "POST",
         body: JSON.stringify(payload),
-      });
-    },
-
-    generateWorkoutPdf(profile, result) {
-      return requestBlob("/api/workout-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ profile, result }),
       });
     },
 

@@ -14,6 +14,8 @@ interface SyncHistoryEntryInput {
   result: Record<string, unknown>;
 }
 
+type HistoryMergeEntry = WorkoutHistoryEntry | SyncHistoryEntryInput;
+
 interface ClientHistory {
   clientId: string;
   entries: WorkoutHistoryEntry[];
@@ -74,12 +76,12 @@ export function addWorkoutToHistory(
 
 export function syncClientHistory(
   clientId: string,
-  localEntries: SyncHistoryEntryInput[],
+  localEntries: HistoryMergeEntry[],
 ): ClientHistory {
   const serverHistory = getClientHistory(clientId);
 
   // Mesclar históricos: manter entries únicas por ID
-  const merged = new Map<string, WorkoutHistoryEntry | SyncHistoryEntryInput>();
+  const merged = new Map<string, HistoryMergeEntry>();
 
   // Adicionar histórico do servidor
   serverHistory.entries.forEach((entry) => {

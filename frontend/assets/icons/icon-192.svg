@@ -1,12 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" fill="none">
-  <rect width="192" height="192" rx="36" fill="#08163A"/>
-  <circle cx="96" cy="96" r="68" fill="url(#g1)"/>
-  <path d="M57 103C65 86 76 77 91 73C106 69 121 75 135 92" stroke="#F5FF4A" stroke-width="12" stroke-linecap="round"/>
-  <rect x="70" y="102" width="54" height="20" rx="10" fill="#41FF8D"/>
   <defs>
-    <linearGradient id="g1" x1="40" y1="34" x2="150" y2="156" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#A45CFF"/>
-      <stop offset="1" stop-color="#41FF8D"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a0a2e"/>
+      <stop offset="100%" stop-color="#0d1f3c"/>
+    </linearGradient>
+    <linearGradient id="ff" x1="20" y1="40" x2="172" y2="152" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d84b63"/>
+      <stop offset="45%" stop-color="#A45CFF"/>
+      <stop offset="100%" stop-color="#41FF8D"/>
+    </linearGradient>
+    <linearGradient id="dot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5FF4A"/>
+      <stop offset="100%" stop-color="#41FF8D"/>
     </linearGradient>
   </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+
+  <!-- Subtle glow circle -->
+  <circle cx="96" cy="90" r="74" fill="#A45CFF" opacity="0.06"/>
+
+  <!-- "FF" monogram — two bold stylized F letters -->
+  <!-- First F -->
+  <rect x="28" y="44" width="11" height="104" rx="5" fill="url(#ff)"/>
+  <rect x="28" y="44" width="60" height="11" rx="5" fill="url(#ff)"/>
+  <rect x="28" y="86" width="48" height="11" rx="5" fill="url(#ff)"/>
+
+  <!-- Second F -->
+  <rect x="103" y="44" width="11" height="104" rx="5" fill="url(#ff)"/>
+  <rect x="103" y="44" width="60" height="11" rx="5" fill="url(#ff)"/>
+  <rect x="103" y="86" width="48" height="11" rx="5" fill="url(#ff)"/>
+
+  <!-- Accent dot between the two F's -->
+  <circle cx="96" cy="150" r="5" fill="url(#dot)"/>
+
+  <!-- Top sparkle dots -->
+  <circle cx="164" cy="28" r="3.5" fill="#F5FF4A" opacity="0.9"/>
+  <circle cx="28" cy="164" r="2.5" fill="#41FF8D" opacity="0.7"/>
 </svg>

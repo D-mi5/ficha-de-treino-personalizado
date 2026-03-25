@@ -1,7 +1,8 @@
-const CACHE_NAME = "treino-feminino-v2";
+const CACHE_NAME = "treino-feminino-v36";
 const ASSETS_TO_CACHE = [
   "/",
   "/form",
+  "/dashboard",
   "/resultado",
   "/offline.html",
   "/styles/output.css",

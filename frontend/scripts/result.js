@@ -5,7 +5,6 @@ const contentEl = document.getElementById("workout-content");
 const imcEl = document.getElementById("imc-value");
 const intensityEl = document.getElementById("intensity-value");
 const progressionEl = document.getElementById("progression-value");
-const downloadPdfEl = document.getElementById("download-pdf");
 const loadingTextEl = document.getElementById("loading-text");
 const errorMessageEl = document.getElementById("error-message");
 const retryRequestEl = document.getElementById("retry-request");
@@ -92,6 +91,24 @@ let lastPayload = null;
 let lastResult = null;
 let isRequestInFlight = false;
 let hasPendingWorkoutRequest = false;
+
+function getStoredPayload() {
+  try {
+    const raw = localStorage.getItem("workoutPayload");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getStoredResult() {
+  try {
+    const raw = localStorage.getItem("workoutResult");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 function getHistory() {
   return syncModule.getLocalHistory();
@@ -392,37 +409,6 @@ function renderNetworkStatus() {
   networkStatusEl.classList.remove("hidden");
 }
 
-function setupPdfDownload() {
-  if (!downloadPdfEl) {
-    return;
-  }
-
-  downloadPdfEl.addEventListener("click", async () => {
-    if (!lastPayload || !lastResult) {
-      return;
-    }
-
-    try {
-      if (!navigator.onLine) {
-        throw new Error("OFFLINE");
-      }
-
-      const blob = await window.apiClient.generateWorkoutPdf(lastPayload, lastResult);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "ficha-treino-personalizada.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(error);
-      alert("Não foi possível baixar o PDF agora. Tente novamente quando a internet estiver estável.");
-    }
-  });
-}
-
 async function requestWorkout() {
   if (isRequestInFlight) {
     return;
@@ -526,7 +512,6 @@ clearHistoryEl?.addEventListener("click", () => {
   renderHistoryList();
 });
 
-setupPdfDownload();
 renderHistoryList();
 
 // Carregar histórico merged (local + servidor) na inicialização
@@ -534,4 +519,17 @@ syncModule.loadMergedHistory().then(() => {
   renderHistoryList();
 });
 
-requestWorkout();
+lastPayload = getStoredPayload();
+lastResult = getStoredResult();
+
+if (lastResult) {
+  renderWorkoutResult(lastResult);
+} else if (lastPayload) {
+  requestWorkout();
+} else {
+  loadingEl?.classList.add("hidden");
+  errorEl?.classList.remove("hidden");
+  if (errorMessageEl) {
+    errorMessageEl.textContent = "Nenhuma ficha pronta foi encontrada. Preencha o formulário para gerar seu plano.";
+  }
+}

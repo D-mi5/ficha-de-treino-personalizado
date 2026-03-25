@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1880" viewBox="0 0 1280 1880" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1180" y2="1820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07152E"/>
+      <stop offset="1" stop-color="#12264A"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="rose" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#E35D74"/>
+      <stop offset="1" stop-color="#B93554"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1280" height="1880" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="28" flood-color="#020817" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="1880" fill="#E8EDF5"/>
+  <g filter="url(#shadow)">
+    <rect x="60" y="40" width="1160" height="1800" rx="34" fill="url(#bg)"/>
+  </g>
+
+  <rect x="110" y="96" width="1060" height="98" rx="26" fill="white" fill-opacity="0.08"/>
+  <text x="150" y="140" fill="#F9FAFB" font-family="Arial, sans-serif" font-size="34" font-weight="700">Ficha Femme</text>
+  <text x="150" y="176" fill="#C8D4EA" font-family="Arial, sans-serif" font-size="20">Exemplo de ficha personalizada gerada com análise inicial, divisão semanal e progressão.</text>
+  <rect x="948" y="118" width="172" height="54" rx="18" fill="url(#rose)"/>
+  <text x="985" y="152" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="20" font-weight="700">Plano pronto</text>
+
+  <rect x="110" y="234" width="510" height="208" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+  <text x="146" y="282" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">DADOS DA CLIENTE</text>
+  <text x="146" y="326" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22">Nome: Cliente Exemplo</text>
+  <text x="146" y="362" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Idade: 31 anos</text>
+  <text x="146" y="396" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Peso: 67 kg | Altura: 1,64 m</text>
+  <text x="146" y="430" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Objetivo: Definição com foco em glúteos e posterior</text>
+
+  <rect x="650" y="234" width="520" height="208" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+  <text x="686" y="282" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">ANÁLISE INICIAL</text>
+  <text x="686" y="326" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22">IMC: 24,9 (peso adequado)</text>
+  <text x="686" y="362" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Intensidade sugerida: moderada</text>
+  <text x="686" y="396" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Progressão: aumentar 3% a 5% por semana</text>
+  <text x="686" y="430" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Observação: manter técnica limpa e descanso controlado</text>
+
+  <rect x="110" y="478" width="1060" height="112" rx="24" fill="#0F1F3D" stroke="#23395D"/>
+  <text x="146" y="522" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">ESTRUTURA SEMANAL</text>
+  <text x="146" y="560" fill="#E6EEF8" font-family="Arial, sans-serif" font-size="22">Segunda: Treino A | Terça: Cardio leve + abdômen | Quarta: Treino B | Quinta: descanso | Sexta: Treino C | Sábado: Treino D</text>
+
+  <g>
+    <rect x="110" y="628" width="510" height="278" rx="24" fill="#102244" stroke="#27436A"/>
+    <text x="146" y="674" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="24" font-weight="700">Treino A • Inferiores completos</text>
+    <text x="146" y="718" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Agachamento livre • 4x10</text>
+    <text x="146" y="752" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Leg press • 4x12</text>
+    <text x="146" y="786" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Stiff • 3x10</text>
+    <text x="146" y="820" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Afundo com halteres • 3x12</text>
+    <text x="146" y="854" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Panturrilha em pé • 4x15</text>
+  </g>
+
+  <g>
+    <rect x="660" y="628" width="510" height="278" rx="24" fill="#102244" stroke="#27436A"/>
+    <text x="696" y="674" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="24" font-weight="700">Treino B • Glúteos e posterior</text>
+    <text x="696" y="718" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Elevação pélvica • 4x12</text>
+    <text x="696" y="752" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Mesa flexora • 4x12</text>
+    <text x="696" y="786" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Cadeira abdutora • 3x15</text>
+    <text x="696" y="820" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Coice na polia • 3x15</text>
+    <text x="696" y="854" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Prancha • 3x40s</text>
+  </g>
+
+  <g>
+    <rect x="110" y="942" width="510" height="278" rx="24" fill="#102244" stroke="#27436A"/>
+    <text x="146" y="988" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="24" font-weight="700">Treino C • Superiores</text>
+    <text x="146" y="1032" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Puxada frontal • 4x12</text>
+    <text x="146" y="1066" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Remada baixa • 4x12</text>
+    <text x="146" y="1100" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Desenvolvimento • 3x12</text>
+    <text x="146" y="1134" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Rosca alternada • 3x12</text>
+    <text x="146" y="1168" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Tríceps corda • 3x15</text>
+  </g>
+
+  <g>
+    <rect x="660" y="942" width="510" height="278" rx="24" fill="#102244" stroke="#27436A"/>
+    <text x="696" y="988" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="24" font-weight="700">Treino D • Metabólico e cardio</text>
+    <text x="696" y="1032" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Agachamento sumô • 3x15</text>
+    <text x="696" y="1066" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Passada no smith • 3x12</text>
+    <text x="696" y="1100" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Elevação pélvica unilateral • 3x12</text>
+    <text x="696" y="1134" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Abdômen infra • 3x15</text>
+    <text x="696" y="1168" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="20">Cardio moderado • 18 min</text>
+  </g>
+
+  <rect x="110" y="1258" width="1060" height="210" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+  <text x="146" y="1306" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">DICAS FINAIS</text>
+  <text x="146" y="1350" fill="#EAF1FB" font-family="Arial, sans-serif" font-size="21">• Manter descanso entre 60 e 90 segundos nos exercícios principais.</text>
+  <text x="146" y="1386" fill="#EAF1FB" font-family="Arial, sans-serif" font-size="21">• Priorizar execução controlada e progressão gradual de carga.</text>
+  <text x="146" y="1422" fill="#EAF1FB" font-family="Arial, sans-serif" font-size="21">• Reavaliar medidas e evolução após 4 semanas.</text>
+
+  <rect x="110" y="1504" width="1060" height="246" rx="26" fill="#0F1F3D" stroke="#23395D"/>
+  <text x="146" y="1552" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="28" font-weight="700">Resumo visual do resultado</text>
+  <text x="146" y="1602" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Plano coerente com objetivo e frequência semanal</text>
+  <text x="146" y="1640" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Organização clara por blocos de treino</text>
+  <text x="146" y="1678" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Linguagem simples e profissional</text>
+  <text x="146" y="1716" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Estrutura próxima do resultado real esperado na página final</text>
+</svg>

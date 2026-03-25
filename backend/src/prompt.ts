@@ -81,9 +81,17 @@ DEFINICAO:
 - Desenvolvimento
 - Abdomen
 
-8. SAIDA:
+8. CONTEXTO CLINICO — OBRIGATORIO SEGUIR:
+O sistema ja avaliou o perfil da cliente e fornece um contexto clinico abaixo.
+VOCE DEVE respeitar todas as restricoes e orientacoes informadas nesse contexto.
+Se o contexto indica risco articular, evitar impacto alto e preferir maquinas.
+Se indica comorbidade, manter treino conservador e mencionar monitoramento medico.
+Se indica obesidade ou idosa, reduzir intensidade e priorizar seguranca.
+Se houver ajuste de objetivo, justificar brevemente na analise da cliente.
+
+9. SAIDA:
 Gerar resposta clara, organizada e profissional com:
-- Analise do perfil da cliente
+- Analise do perfil da cliente (incluindo contexto clinico relevante)
 - Estrutura do treino
 - Ficha completa A/B/C/D
 - Distribuicao por dias da semana
@@ -92,10 +100,15 @@ Gerar resposta clara, organizada e profissional com:
 NAO gerar texto generico.
 NAO repetir exercicios sem logica.
 NAO criar treino incoerente com a frequencia semanal.
+NAO ignorar restricoes clinicas informadas.
 A resposta deve parecer feita por um personal trainer profissional.
 `;
 
 export function buildWorkoutPrompt(profile: ClientProfile, analysis: ProfileAnalysis): string {
+  const ajusteBlock = analysis.mensagemAjuste
+    ? `\n⚠️ AJUSTE APLICADO PELO SISTEMA: ${analysis.mensagemAjuste}\n`
+    : "";
+
   return `
 ${basePrompt}
 
@@ -103,7 +116,7 @@ DADOS DA CLIENTE:
 - Idade: ${profile.idade}
 - Peso: ${profile.peso} kg
 - Altura: ${profile.altura} m
-- Objetivo: ${profile.objetivo}
+- Objetivo declarado: ${profile.objetivo}
 - Nivel: ${profile.nivel}
 - Dias por semana: ${profile.diasSemana}
 - Observacoes extras: ${profile.observacoes?.trim() || "nenhuma"}
@@ -112,9 +125,10 @@ DADOS CALCULADOS PELO SISTEMA:
 - IMC: ${analysis.imc} (${analysis.classificacaoImc})
 - Intensidade sugerida: ${analysis.intensidadeSugerida}
 - Progressao semanal recomendada: ${analysis.progressaoSemanal}
-
+- Contexto clinico: ${analysis.contextoClinico}
+${ajusteBlock}
 FORMATO OBRIGATORIO DE RESPOSTA:
-1) Analise da cliente
+1) Analise da cliente (mencionar contexto clinico relevante)
 2) Estrutura semanal
 3) Ficha detalhada com Treino A/B/C/D
 4) Quadro final com sugestao de distribuicao por dias da semana (ex.: segunda, terca...)

@@ -7,22 +7,33 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
     <title>Sua evolução de treinos</title>
-    <link rel="stylesheet" href="./styles/output.css" />
+    <link rel="stylesheet" href="./styles/output.css?v=20260324-6" />
   </head>
   <body class="page-shell">
     <main class="page-main max-w-7xl">
       <header class="page-header mb-8">
         <div>
-          <p class="text-sm uppercase tracking-[0.24em] text-neonGreen">Dashboard</p>
-          <h1 class="mt-2 text-3xl font-extrabold md:text-4xl">Sua evolução de treinos</h1>
+          <a href="/" aria-label="Voltar ao início" class="inline-block">
+            <img src="./assets/icons/icon-192.svg" alt="Ficha Femme" class="brand-logo-compact" />
+          </a>
         </div>
         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <a href="/" class="w-full rounded-lg border border-white/30 px-4 py-2 text-center text-sm sm:w-auto">Voltar ao início</a>
-          <button id="logout-btn" class="w-full rounded-lg border border-red-300/60 px-4 py-2 text-center text-sm font-semibold text-red-300 sm:w-auto">
+          <a id="go-ready-result" href="/resultado" class="rounded-lg border border-white/30 px-4 py-2 text-center text-sm font-semibold text-white">
+            Voltar para ficha pronta
+          </a>
+          <a href="/form" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
+            Nova ficha
+          </a>
+          <button id="logout-btn" class="rounded-lg border border-red-300/60 px-4 py-2 text-center text-sm font-semibold text-red-300">
             Sair
           </button>
         </div>
       </header>
+
+      <div>
+        <p class="text-sm uppercase tracking-[0.24em] text-neonGreen">Dashboard</p>
+        <h1 class="mt-2 text-3xl font-extrabold md:text-4xl">Sua evolução de fichas</h1>
+      </div>
 
       <section id="loading" class="glow-panel flex flex-col items-center gap-4 p-8 sm:p-10 md:p-12">
         <div class="arm-loader"></div>
@@ -51,25 +62,39 @@
               </select>
             </label>
           </div>
-          <button id="apply-filters" class="mt-4 w-full rounded-xl border border-white/30 px-5 py-3 font-semibold sm:w-auto">
-            Aplicar Filtros
-          </button>
+          <div class="mt-4 flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <button id="apply-filters" class="neon-button w-full sm:w-auto">
+              Aplicar Filtros
+            </button>
+            <button id="clear-filters" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
+              Limpar filtros
+            </button>
+          </div>
         </div>
 
+        <!-- Adicionado design moderno Ficha Femme: cards de estatística coloridos -->
         <div id="stats" class="grid gap-4 md:grid-cols-3">
-          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Total de Planos</p>
+          <div class="card-femme stat-card-yellow rounded-xl border p-4 transition-all">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Total de Fichas</p>
             <p id="stat-total" class="mt-2 text-2xl font-bold text-neonYellow">0</p>
           </div>
-          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
+          <div class="card-femme stat-card-green rounded-xl border p-4 transition-all">
             <p class="text-xs uppercase tracking-[0.2em] text-white/70">Última Gerada</p>
             <p id="stat-latest" class="mt-2 text-sm font-semibold text-neonGreen">-</p>
           </div>
-          <div class="rounded-xl border border-white/20 bg-black/20 p-4">
-            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Objetivo Mais Comum</p>
+          <div class="card-femme card-lilac rounded-xl border p-4 transition-all">
+            <p class="text-xs uppercase tracking-[0.2em] text-white/70">Frequência Semanal Média</p>
             <p id="stat-common" class="mt-2 text-sm font-semibold text-white">-</p>
           </div>
         </div>
+
+        <section id="progress-section" class="glow-panel p-5 sm:p-7 md:p-8">
+          <h2 class="mb-4 text-xl font-bold">Avaliação de Progresso</h2>
+          <div id="progress-grid" class="grid gap-4 md:grid-cols-2"></div>
+          <p id="progress-empty" class="text-sm text-white/75">
+            Gere pelo menos duas fichas para visualizar a evolução da cliente ao longo do tempo.
+          </p>
+        </section>
 
         <div class="glow-panel p-5 sm:p-7 md:p-8">
           <h2 class="mb-4 text-xl font-bold">Planos Gerados</h2>
@@ -80,15 +105,15 @@
 
       <section id="unauthorized" class="glow-panel hidden p-8 text-center">
         <h2 class="text-xl font-bold text-red-300">Acesso negado</h2>
-        <p class="mt-2 text-white/90">Entre na sua conta para acompanhar seus planos e sua evolução.</p>
-        <a href="/entrar" class="mt-4 inline-block rounded-xl border border-neonGreen/60 px-6 py-3 font-semibold text-neonGreen">
+        <p class="mt-2 text-white/90">Entre na sua conta para acompanhar suas fichas e sua evolução.</p>
+        <a href="/entrar?mode=login&next=/dashboard" class="neon-button mt-4 inline-block">
           Ir para o login
         </a>
       </section>
     </main>
 
-    <script src="./scripts/pwa.js"></script>
-    <script src="./scripts/api-client.js"></script>
-    <script src="./scripts/dashboard.js"></script>
+    <script src="./scripts/pwa.js?v=20260324-7"></script>
+    <script src="./scripts/api-client.js?v=20260324-2"></script>
+    <script src="./scripts/dashboard.js?v=20260324-2"></script>
   </body>
 </html>

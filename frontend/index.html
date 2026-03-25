@@ -8,78 +8,125 @@
     <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Treino Feminino Personalizado | Comece Hoje</title>
-    <link rel="stylesheet" href="./styles/output.css" />
+    <title>Ficha Femme | Treino Personalizado para Mulheres</title>
+    <link rel="stylesheet" href="./styles/output.css?v=20260324-7" />
   </head>
-  <body class="page-shell">
-    <main class="page-main compact-stack flex max-w-6xl flex-col gap-8 md:gap-10">
-      <header class="page-header">
-        <div>
-          <p class="text-sm uppercase tracking-[0.24em] text-neonGreen">Workout Studio</p>
-          <h1 class="mt-2 text-3xl font-extrabold md:text-5xl">Transforme seu treino em resultado real, com um plano feito para você</h1>
+  <body id="topo" class="page-shell">
+    <main class="page-main compact-stack flex max-w-6xl flex-col gap-10 md:gap-12">
+
+      <!-- NAVBAR -->
+      <header class="page-header rounded-2xl border border-white/15 bg-black/20 px-4 py-3 sm:px-5">
+        <div class="flex items-center gap-3">
+          <img src="./assets/icons/icon-192.svg" alt="Ficha Femme" class="h-10 w-10 rounded-xl" />
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-neonGreen">Ficha Femme</p>
+            <p class="text-[10px] text-white/50">Treino personalizado para mulheres</p>
+          </div>
         </div>
-        <div class="flex flex-col gap-2 sm:flex-row">
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <button id="install-app" class="hidden rounded-lg border border-neonGreen/70 px-4 py-2 text-sm font-semibold text-neonGreen">
             Instalar aplicativo
           </button>
-          <a href="/entrar" class="rounded-lg border border-white/30 px-4 py-2 text-center text-sm font-semibold text-white">
-            Entrar
-          </a>
-          <a href="/dashboard" class="rounded-lg border border-white/30 px-4 py-2 text-center text-sm font-semibold text-white">
-            Meu histórico
+          <a href="/entrar" class="rounded-lg bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:bg-lilac/30">
+            Cadastre-se
           </a>
         </div>
       </header>
 
-      <section class="glow-panel grid gap-7 p-5 sm:p-7 md:grid-cols-2 md:items-center md:gap-8 md:p-10 lg:p-12">
+      <!-- HERO -->
+      <section class="fade-up space-y-4 text-center">
+        <span class="femme-badge inline-block">✦ Treino 100% feminino</span>
+        <h1 class="text-3xl font-extrabold leading-tight md:text-5xl">
+          Transforme seu treino.<br class="hidden sm:block" />
+          <span class="gradient-underline">Transforme seu corpo.</span>
+        </h1>
+        <p class="mx-auto max-w-xl text-base text-white/75">
+          Seu corpo, seu ritmo, sua ficha. Tudo adaptado a você.
+        </p>
+      </section>
+
+      <!-- PAINEL PRINCIPAL CTA -->
+      <section class="glow-panel grid gap-8 p-6 sm:p-8 md:grid-cols-2 md:items-center md:p-10 lg:p-12">
         <div class="space-y-5">
-          <h2 class="text-2xl font-bold md:text-4xl">Chega de treinar sem direção</h2>
-          <p class="text-white/85">
-            Crie sua ficha personalizada em poucos passos e tenha clareza total do que fazer em cada treino.
-            Você economiza tempo, evita erros e mantém constância com um plano pensado para sua rotina.
+          <h2 class="text-2xl font-bold leading-snug md:text-3xl">
+            Pare de treinar sem direção.<br />
+            <span class="text-neonGreen">Tenha clareza total.</span>
+          </h2>
+          <p class="text-sm leading-relaxed text-white/80">
+            Crie sua ficha em poucos minutos e saiba exatamente o que fazer em cada treino.
+            Um plano pensado para sua rotina, seu corpo e seus objetivos.
           </p>
           <ul class="space-y-2 text-sm text-white/90">
-            <li>Plano feminino alinhado ao seu objetivo</li>
-            <li>Estratégia semanal simples de seguir</li>
-            <li>Orientações claras para você evoluir com segurança</li>
+            <li class="flex items-center gap-2">
+              <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-neonGreen"></span>
+              Plano feminino alinhado ao seu objetivo
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-neonGreen"></span>
+              Estratégia semanal simples de seguir
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-neonGreen"></span>
+              Orientações claras para evoluir com segurança
+            </li>
           </ul>
-          <a href="/form" class="neon-button w-full sm:w-auto">Quero minha ficha agora</a>
-          <p class="text-xs text-white/70">Sem complicação. Preenchimento rápido e resultado imediato.</p>
+          <a href="/exemplo-ficha.html" class="neon-button inline-flex w-full items-center justify-center sm:w-auto">Exemplo de ficha</a>
+          <p class="text-xs text-white/50">Sem cadastro obrigatório. Resultado imediato.</p>
         </div>
-        <div class="rounded-2xl border border-white/20 bg-deepBlue/60 p-5 shadow-neon sm:p-6">
-          <p class="text-sm uppercase tracking-[0.2em] text-neonYellow">Para quem é</p>
-          <p class="mt-3 text-lg text-white/90">
-            "Perfeito para mulheres que querem emagrecer, ganhar massa ou definir o corpo com um plano objetivo,
-            organizado e possível de manter no dia a dia."
-          </p>
+
+        <!-- Card lateral com imagem animada -->
+        <div class="woman-motion-card card-femme rounded-2xl border p-4 sm:p-5 md:p-6">
+          <div class="woman-glow"></div>
+          <img src="/assets/images/woman.png" alt="Imagem feminina com movimento suave" class="woman-motion-image" />
         </div>
       </section>
 
+      <!-- 3 CARDS DE BENEFÍCIOS -->
       <section class="grid gap-4 md:grid-cols-3">
-        <article class="rounded-2xl border border-white/20 bg-black/20 p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-neonYellow">Clareza total</p>
-          <p class="mt-2 text-sm text-white/90">Você sabe exatamente o que fazer, como fazer e em que ordem treinar.</p>
+        <article class="card-femme card-lilac rounded-2xl border p-5 fade-up-1">
+          <div class="feature-icon feature-icon-lilac">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-neonYellow">Clareza total</p>
+          <p class="mt-2 text-sm leading-relaxed text-white/85">Você sabe exatamente o que fazer, como fazer e em que ordem treinar.</p>
         </article>
-        <article class="rounded-2xl border border-white/20 bg-black/20 p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-neonYellow">Mais constância</p>
-          <p class="mt-2 text-sm text-white/90">Com um plano simples de seguir, sua rotina fica leve e você não desiste no meio do caminho.</p>
+
+        <article class="card-femme card-rose rounded-2xl border p-5 fade-up-2">
+          <div class="feature-icon feature-icon-rose">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-neonYellow">Mais constância</p>
+          <p class="mt-2 text-sm leading-relaxed text-white/85">Com um plano simples de seguir, sua rotina fica leve e você mantém o ritmo.</p>
         </article>
-        <article class="rounded-2xl border border-white/20 bg-black/20 p-5">
-          <p class="text-xs uppercase tracking-[0.2em] text-neonYellow">Mais resultado</p>
-          <p class="mt-2 text-sm text-white/90">Estrutura de treino orientada ao seu objetivo para acelerar sua evolução com segurança.</p>
+
+        <article class="card-femme card-emerald rounded-2xl border p-5 fade-up-3">
+          <div class="feature-icon feature-icon-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+            </svg>
+          </div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-neonYellow">Mais resultado</p>
+          <p class="mt-2 text-sm leading-relaxed text-white/85">Estrutura orientada ao seu objetivo para acelerar sua evolução com segurança.</p>
         </article>
       </section>
 
-      <section class="glow-panel p-6 sm:p-8 md:p-10">
-        <p class="text-sm uppercase tracking-[0.22em] text-neonYellow">Comece hoje</p>
-        <h3 class="mt-2 text-2xl font-extrabold md:text-3xl">Seu próximo treino pode ser o início da sua melhor fase</h3>
-        <p class="mt-3 text-white/85">
-          Dê o primeiro passo agora. Em poucos minutos, você recebe um plano completo para treinar com foco,
-          segurança e motivação.
+      <!-- CTA FINAL -->
+      <section class="glow-panel cta-gradient p-7 sm:p-9 md:p-11">
+        <span class="femme-badge mb-4 inline-block">Comece hoje mesmo</span>
+        <h3 class="mt-3 text-2xl font-extrabold leading-snug md:text-3xl">
+          Mais constância, mais segurança,<br class="hidden sm:block" /> mais resultado.
+        </h3>
+        <p class="mt-3 max-w-lg text-sm leading-relaxed text-white/75">
+          Em poucos minutos você recebe um plano completo para treinar com foco, segurança e motivação.
         </p>
-        <a href="/form" class="neon-button mt-5 w-full sm:w-auto">Gerar minha ficha personalizada</a>
+        <a href="/form" class="neon-button mt-6 w-full sm:w-auto">Gerar minha ficha personalizada</a>
       </section>
+
     </main>
-    <script src="./scripts/pwa.js"></script>
+    <script src="./scripts/pwa.js?v=20260324-8"></script>
   </body>
 </html>

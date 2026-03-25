@@ -1,9 +1,8 @@
 import { Express } from "express";
 import { generateWorkout } from "../agents.js";
 import { addWorkoutToHistory } from "../history.js";
-import { buildWorkoutPdf } from "../pdf.js";
 import { ClientProfile } from "../types.js";
-import { pdfRequestSchema, profileSchema } from "../schemas.js";
+import { profileSchema } from "../schemas.js";
 
 export function registerWorkoutRoutes(app: Express): void {
   app.get("/api/health", (_req, res) => {
@@ -31,30 +30,6 @@ export function registerWorkoutRoutes(app: Express): void {
       return res.json(result);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro interno";
-      return res.status(500).json({ error: message });
-    }
-  });
-
-  app.post("/api/workout-pdf", async (req, res) => {
-    const parsed = pdfRequestSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      return res.status(400).json({
-        error: "Dados inválidos para PDF",
-        issues: parsed.error.flatten(),
-      });
-    }
-
-    try {
-      const { profile, result } = parsed.data;
-      const pdfBuffer = await buildWorkoutPdf(profile as ClientProfile, result);
-      const fileName = "ficha-treino-personalizada.pdf";
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
-      return res.send(pdfBuffer);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao gerar PDF";
       return res.status(500).json({ error: message });
     }
   });

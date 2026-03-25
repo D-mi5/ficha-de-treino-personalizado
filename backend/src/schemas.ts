@@ -10,19 +10,6 @@ export const profileSchema = z.object({
   observacoes: z.string().max(400).optional(),
 });
 
-export const pdfRequestSchema = z.object({
-  profile: profileSchema,
-  result: z.object({
-    workoutPlan: z.string().min(20),
-    analysis: z.object({
-      imc: z.number(),
-      classificacaoImc: z.string(),
-      intensidadeSugerida: z.enum(["leve", "moderada", "intensa"]),
-      progressaoSemanal: z.string(),
-    }),
-  }),
-});
-
 export const historySyncSchema = z.object({
   entries: z
     .array(

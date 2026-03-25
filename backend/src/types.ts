@@ -1,5 +1,6 @@
 export type Objetivo = "emagrecimento" | "hipertrofia" | "definicao";
 export type Nivel = "iniciante" | "intermediario" | "avancado";
+export type Intensidade = "leve" | "moderada" | "intensa";
 
 export interface ClientProfile {
   idade: number;
@@ -14,8 +15,10 @@ export interface ClientProfile {
 export interface WorkoutAnalysis {
   imc: number;
   classificacaoImc: string;
-  intensidadeSugerida: "leve" | "moderada" | "intensa";
+  intensidadeSugerida: Intensidade;
   progressaoSemanal: string;
+  contextoClinico?: string;
+  mensagemAjuste?: string | null;
 }
 
 export interface WorkoutResponse {

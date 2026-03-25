@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Gerar ficha personalizada</title>
-    <link rel="stylesheet" href="./styles/output.css" />
+    <link rel="stylesheet" href="./styles/output.css?v=20260324-6" />
   </head>
   <body class="page-shell">
     <main class="page-main compact-stack max-w-5xl space-y-7 md:space-y-8">
@@ -19,13 +19,17 @@
           <button id="install-app" class="hidden rounded-lg border border-neonGreen/70 px-4 py-2 text-sm font-semibold text-neonGreen">
             Instalar aplicativo
           </button>
-          <a href="/" class="w-full rounded-lg border border-white/30 px-4 py-2 text-center text-sm sm:w-auto">Voltar ao início</a>
+          <a href="/" class="w-full rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25 sm:w-auto">Voltar ao início</a>
         </div>
       </header>
 
       <section class="glow-panel p-5 sm:p-6 md:p-9 lg:p-10">
-        <p class="mb-3 text-white/90">Preencha em menos de 1 minuto e receba um plano completo para sua rotina e objetivo.</p>
-        <p class="mb-6 text-sm text-white/75">Quanto mais preciso o preenchimento, mais personalizado será o resultado.</p>
+        <!-- Adicionado design moderno Ficha Femme: badge + frase motivadora -->
+        <div class="mb-5 flex flex-col gap-2">
+          <span class="femme-badge self-start">Personalização inteligente</span>
+          <p class="text-white/90">Preencha em menos de 1 minuto e receba um plano completo para sua rotina e objetivo.</p>
+          <p class="text-sm text-white/75">Quanto mais preciso o preenchimento, mais personalizado e seguro será o resultado.</p>
+        </div>
 
         <form id="workout-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:gap-6">
           <label class="space-y-2">
@@ -82,19 +86,19 @@
           </label>
 
           <label class="space-y-2 md:col-span-2">
-            <span class="text-sm">Observações (opcional)</span>
+            <span class="text-sm">Observações clínicas (opcional)</span>
             <textarea class="input-field min-h-28" name="observacoes" placeholder="Ex.: dores articulares, limitações, experiência prévia..."></textarea>
           </label>
 
           <div class="md:col-span-2">
-            <button type="submit" class="neon-button w-full">Gerar meu plano de treino</button>
-            <p class="mt-2 text-center text-xs text-white/70">Seu plano será gerado na hora.</p>
+            <button type="submit" class="neon-button w-full">Gerar minha ficha agora</button>
+            <p class="mt-2 text-center text-xs text-white/70">Sua ficha é gerada na hora.</p>
           </div>
         </form>
       </section>
     </main>
 
     <script src="./scripts/form.js"></script>
-    <script src="./scripts/pwa.js"></script>
+    <script src="./scripts/pwa.js?v=20260324-7"></script>
   </body>
 </html>

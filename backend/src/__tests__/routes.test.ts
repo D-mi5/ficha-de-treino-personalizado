@@ -1,0 +1,148 @@
+import request from "supertest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockGenerateWorkout } = vi.hoisted(() => ({
+  mockGenerateWorkout: vi.fn(),
+}));
+
+vi.mock("../agents.js", () => ({
+  generateWorkout: mockGenerateWorkout,
+}));
+
+import { createApp } from "../app.js";
+
+const app = createApp();
+
+const validProfile = {
+  idade: 28,
+  peso: 62,
+  altura: 1.65,
+  objetivo: "hipertrofia",
+  nivel: "intermediario",
+  diasSemana: 4,
+  observacoes: "Sem restricoes importantes",
+};
+
+const validResult = {
+  workoutPlan: "Treino A: Agachamento 4x10\nTreino B: Remada 4x12",
+  analysis: {
+    imc: 22.8,
+    classificacaoImc: "peso adequado",
+    intensidadeSugerida: "moderada",
+    progressaoSemanal: "Aumentar 3% por semana",
+  },
+};
+
+describe("Workout and auth routes", () => {
+  beforeEach(() => {
+    mockGenerateWorkout.mockReset();
+    mockGenerateWorkout.mockResolvedValue(validResult);
+  });
+
+  it("returns security headers and hides x-powered-by", async () => {
+    const response = await request(app).get("/api/health");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["x-powered-by"]).toBeUndefined();
+    expect(response.headers["x-content-type-options"]).toBe("nosniff");
+  });
+
+  it("generates workout and persists it in client history", async () => {
+    const historyResponse = await request(app).get("/api/history");
+    const cookies = historyResponse.headers["set-cookie"];
+
+    const response = await request(app)
+      .post("/api/generate-workout")
+      .set("Cookie", cookies)
+      .send(validProfile);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(validResult);
+    expect(mockGenerateWorkout).toHaveBeenCalledTimes(1);
+
+    const updatedHistory = await request(app)
+      .get("/api/history")
+      .set("Cookie", cookies);
+
+    expect(updatedHistory.status).toBe(200);
+    expect(updatedHistory.body.entries).toHaveLength(1);
+    expect(updatedHistory.body.entries[0].payload.objetivo).toBe("hipertrofia");
+  });
+
+  it("rejects invalid workout payload with validation issues", async () => {
+    const response = await request(app)
+      .post("/api/generate-workout")
+      .send({ ...validProfile, idade: 10 });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Dados inválidos");
+    expect(response.body.issues.fieldErrors.idade).toBeTruthy();
+    expect(mockGenerateWorkout).not.toHaveBeenCalled();
+  });
+
+  it("returns safe error when workout generation fails", async () => {
+    mockGenerateWorkout.mockRejectedValueOnce(new Error("Falha na IA"));
+
+    const response = await request(app)
+      .post("/api/generate-workout")
+      .send(validProfile);
+
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe("Falha na IA");
+  });
+
+  it("registers user with hardened cookie attributes", async () => {
+    const email = `routes-${Date.now()}@example.com`;
+    const response = await request(app)
+      .post("/api/auth/register")
+      .send({ email, password: "12345678" });
+
+    expect(response.status).toBe(200);
+    const cookies = response.headers["set-cookie"].join(";");
+    expect(cookies).toContain("sessionToken=");
+    expect(cookies).toContain("HttpOnly");
+    expect(cookies).toContain("SameSite=Strict");
+  });
+
+  it("rejects login with invalid credentials", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "nobody@example.com", password: "12345678" });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("E-mail ou senha incorretos");
+  });
+
+  it("clears session cookie on logout", async () => {
+    const email = `logout-${Date.now()}@example.com`;
+    await request(app)
+      .post("/api/auth/register")
+      .send({ email, password: "12345678" });
+
+    const loginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({ email, password: "12345678" });
+
+    const cookies = loginResponse.headers["set-cookie"];
+    const logoutResponse = await request(app)
+      .post("/api/auth/logout")
+      .set("Cookie", cookies);
+
+    expect(logoutResponse.status).toBe(200);
+    expect(logoutResponse.body.ok).toBe(true);
+    expect(logoutResponse.headers["set-cookie"].join(";")).toContain("sessionToken=");
+  });
+
+  it("rejects invalid history sync payload", async () => {
+    const historyResponse = await request(app).get("/api/history");
+    const cookies = historyResponse.headers["set-cookie"];
+
+    const response = await request(app)
+      .post("/api/history/sync")
+      .set("Cookie", cookies)
+      .send({ entries: [{ invalid: true }] });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("Dados inválidos");
+  });
+});

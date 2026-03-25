@@ -7,19 +7,21 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/assets/icons/icon-192.svg" type="image/svg+xml" />
     <title>Acesse seu espaço de evolução</title>
-    <link rel="stylesheet" href="./styles/output.css" />
+    <link rel="stylesheet" href="./styles/output.css?v=20260324-6" />
   </head>
   <body class="page-shell">
     <main class="page-main mx-auto max-w-md">
-      <div class="glow-panel p-6 sm:p-8">
-        <h1 class="mb-2 text-2xl font-extrabold">Seu espaço de evolução</h1>
-        <p class="mb-6 text-sm text-white/80">Entre para acompanhar seus planos e manter consistência nos treinos.</p>
+      <!-- Adicionado design moderno Ficha Femme: badge + gradiente -->
+      <div class="glow-panel cta-gradient p-6 sm:p-8">
+        <span class="femme-badge mb-3 inline-block">Seu espaço de evolução</span>
+        <h1 class="mb-2 mt-3 text-2xl font-extrabold">Entre e acompanhe sua evolução</h1>
+        <p class="mb-6 text-sm text-white/80">Entre para acompanhar suas fichas e manter consistência nos treinos.</p>
 
         <div class="mb-6 flex gap-2">
           <button id="tab-login" class="tab-button active flex-1 rounded-lg border border-neonGreen/60 px-4 py-2 text-sm font-semibold text-neonGreen">
             Entrar
           </button>
-          <button id="tab-signup" class="tab-button flex-1 rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold">
+          <button id="tab-signup" class="tab-button flex-1 rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
             Criar conta
           </button>
         </div>
@@ -60,7 +62,7 @@
       </div>
     </main>
 
-    <script src="./scripts/pwa.js"></script>
+    <script src="./scripts/pwa.js?v=20260324-7"></script>
     <script src="./scripts/api-client.js"></script>
     <script src="./scripts/auth.js"></script>
   </body>
