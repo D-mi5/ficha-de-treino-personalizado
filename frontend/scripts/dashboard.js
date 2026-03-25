@@ -1,6 +1,9 @@
 const loadingEl = document.getElementById("loading");
 const contentEl = document.getElementById("content");
 const unauthorizedEl = document.getElementById("unauthorized");
+const dashboardErrorEl = document.getElementById("dashboard-error");
+const dashboardErrorMessageEl = document.getElementById("dashboard-error-message");
+const retryDashboardEl = document.getElementById("retry-dashboard");
 
 const filterStartEl = document.getElementById("filter-start");
 const filterEndEl = document.getElementById("filter-end");
@@ -487,6 +490,11 @@ filterEndEl?.addEventListener("change", applyFilters);
 filterGoalEl?.addEventListener("change", applyFilters);
 
 async function init() {
+  loadingEl?.classList.remove("hidden");
+  contentEl?.classList.add("hidden");
+  unauthorizedEl?.classList.add("hidden");
+  dashboardErrorEl?.classList.add("hidden");
+
   try {
     const data = await window.apiClient.getDashboard();
     clinicalRules = resolveClinicalRules(data);
@@ -509,8 +517,18 @@ async function init() {
 
     console.error(error);
     loadingEl?.classList.add("hidden");
-    unauthorizedEl?.classList.remove("hidden");
+    dashboardErrorEl?.classList.remove("hidden");
+
+    if (dashboardErrorMessageEl) {
+      dashboardErrorMessageEl.textContent = error instanceof Error && error.message
+        ? `Falha ao carregar dados: ${error.message}`
+        : "Tivemos uma instabilidade ao carregar o dashboard.";
+    }
   }
 }
+
+retryDashboardEl?.addEventListener("click", () => {
+  init();
+});
 
 init();

@@ -13,7 +13,7 @@
   </head>
   <body class="page-shell">
     <main class="page-main compact-stack max-w-6xl space-y-7 md:space-y-8">
-      <section id="network-status" class="glow-panel hidden p-4 text-sm font-semibold"></section>
+      <section id="network-status" class="glow-panel hidden p-4 text-sm font-semibold" role="status" aria-live="polite"></section>
 
       <header class="page-header">
         <h1 class="text-3xl font-extrabold md:text-4xl">Sua ficha personalizada está pronta</h1>
@@ -25,12 +25,12 @@
         </div>
       </header>
 
-      <section id="loading" class="glow-panel flex flex-col items-center gap-4 p-8 sm:p-10 md:p-12">
+      <section id="loading" class="glow-panel flex flex-col items-center gap-4 p-8 sm:p-10 md:p-12" role="status" aria-live="polite">
         <div class="arm-loader"></div>
         <p id="loading-text" class="text-white/90">Estamos preparando uma ficha pensada para você...</p>
       </section>
 
-      <section id="result" class="glow-panel neon-stripes hidden p-5 sm:p-7 md:p-9 lg:p-10">
+      <section id="result" class="glow-panel neon-stripes hidden p-5 sm:p-7 md:p-9 lg:p-10" tabindex="-1" aria-label="Resultado da ficha de treino">
         <!-- Adicionado design moderno Ficha Femme: badge + título + cards coloridos -->
         <div class="mb-4 flex items-center gap-3">
           <span class="femme-badge">Ficha gerada ✔</span>
@@ -54,10 +54,10 @@
         <div id="workout-content" class="space-y-5 text-sm md:text-base"></div>
       </section>
 
-      <section id="error" class="glow-panel hidden p-5 sm:p-7 md:p-8">
+      <section id="error" class="glow-panel hidden p-5 sm:p-7 md:p-8" role="alert" aria-live="assertive">
         <h2 class="text-xl font-bold text-red-300">Não conseguimos gerar seu plano agora</h2>
         <p id="error-message" class="mt-2 text-white/90">Verifique os dados e tente novamente em instantes.</p>
-        <button id="retry-request" class="mt-4 w-full rounded-xl border border-rose-700/50 bg-lilac/15 px-5 py-3 font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25 sm:w-auto">
+        <button id="retry-request" class="mt-4 w-full rounded-xl border border-rose-700/50 bg-lilac/15 px-5 py-3 font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25 sm:w-auto" aria-describedby="error-message">
           Tentar novamente
         </button>
       </section>

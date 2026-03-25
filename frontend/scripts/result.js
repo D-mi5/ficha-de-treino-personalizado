@@ -92,6 +92,14 @@ let lastResult = null;
 let isRequestInFlight = false;
 let hasPendingWorkoutRequest = false;
 
+function createHistoryId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function getStoredPayload() {
   try {
     const raw = localStorage.getItem("workoutPayload");
@@ -123,7 +131,7 @@ function saveHistory(history) {
 function saveWorkoutToHistory(payload, result) {
   const history = getHistory();
   const item = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: createHistoryId(),
     createdAt: new Date().toISOString(),
     payload,
     result,
@@ -332,6 +340,7 @@ function renderWorkoutResult(data) {
   loadingEl?.classList.add("hidden");
   errorEl?.classList.add("hidden");
   resultEl?.classList.remove("hidden");
+  resultEl?.focus();
 }
 
 function openHistoryItem(itemId) {
@@ -361,16 +370,17 @@ function renderHistoryList() {
   historySectionEl.classList.remove("hidden");
   historyListEl.innerHTML = history
     .map((item) => {
-      const dateLabel = new Date(item.createdAt).toLocaleString("pt-BR");
-      const objetivo = item?.payload?.objetivo || "-";
-      const dias = item?.payload?.diasSemana || "-";
+      const dateLabel = escapeHtml(new Date(item.createdAt).toLocaleString("pt-BR"));
+      const objetivo = escapeHtml(item?.payload?.objetivo || "-");
+      const dias = escapeHtml(item?.payload?.diasSemana || "-");
+      const safeId = escapeHtml(item.id);
 
       return `
         <article class="rounded-xl border border-white/20 bg-black/20 p-4">
           <p class="text-xs uppercase tracking-[0.2em] text-white/65">${dateLabel}</p>
           <p class="mt-2 text-sm text-white/90">Objetivo: <strong>${objetivo}</strong></p>
           <p class="text-sm text-white/90">Dias/semana: <strong>${dias}</strong></p>
-          <button data-history-id="${item.id}" class="mt-3 w-full rounded-lg border border-neonGreen/60 px-3 py-2 text-sm font-semibold text-neonGreen sm:w-auto">
+          <button data-history-id="${safeId}" class="mt-3 w-full rounded-lg border border-neonGreen/60 px-3 py-2 text-sm font-semibold text-neonGreen sm:w-auto">
             Abrir ficha salva
           </button>
         </article>
@@ -415,6 +425,11 @@ async function requestWorkout() {
   }
 
   isRequestInFlight = true;
+  retryRequestEl?.setAttribute("disabled", "true");
+  retryRequestEl?.classList.add("is-loading");
+  if (retryRequestEl) {
+    retryRequestEl.textContent = "Tentando novamente...";
+  }
 
   try {
     const rawPayload = localStorage.getItem("workoutPayload");
@@ -471,6 +486,11 @@ async function requestWorkout() {
     }
   } finally {
     isRequestInFlight = false;
+    retryRequestEl?.removeAttribute("disabled");
+    retryRequestEl?.classList.remove("is-loading");
+    if (retryRequestEl) {
+      retryRequestEl.textContent = "Tentar novamente";
+    }
   }
 }
 
@@ -508,6 +528,10 @@ retryRequestEl?.addEventListener("click", () => {
 });
 
 clearHistoryEl?.addEventListener("click", () => {
+  if (!window.confirm("Deseja realmente limpar o histórico offline desta tela?")) {
+    return;
+  }
+
   localStorage.removeItem(HISTORY_KEY);
   renderHistoryList();
 });

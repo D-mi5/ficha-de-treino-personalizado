@@ -31,7 +31,7 @@
           <p class="text-sm text-white/75">Quanto mais preciso o preenchimento, mais personalizado e seguro será o resultado.</p>
         </div>
 
-        <form id="workout-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:gap-6">
+        <form id="workout-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:gap-6" novalidate>
           <label class="space-y-2">
             <span class="text-sm">Idade</span>
             <input class="input-field" name="idade" type="number" min="14" max="85" required />
@@ -91,8 +91,9 @@
           </label>
 
           <div class="md:col-span-2">
-            <button type="submit" class="neon-button w-full">Gerar minha ficha agora</button>
-            <p class="mt-2 text-center text-xs text-white/70">Sua ficha é gerada na hora.</p>
+            <button id="submit-workout" type="submit" class="neon-button w-full" aria-describedby="form-feedback form-hint">Gerar minha ficha agora</button>
+            <p id="form-hint" class="mt-2 text-center text-xs text-white/70">Sua ficha é gerada na hora.</p>
+            <p id="form-feedback" class="status-inline hidden text-center" role="alert" aria-live="assertive"></p>
           </div>
         </form>
       </section>

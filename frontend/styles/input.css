@@ -129,12 +129,41 @@ body {
   box-shadow: 0 14px 28px rgba(169, 46, 76, 0.34);
 }
 
+.neon-button:disabled,
+.neon-button.is-loading {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 8px 18px rgba(169, 46, 76, 0.2);
+}
+
 .input-field {
   @apply w-full min-h-12 rounded-xl border border-white/25 bg-slate-950/40 px-4 py-3 text-white outline-none transition;
 }
 
 .input-field:focus {
   @apply border-neonGreen ring-2 ring-neonGreen/50;
+}
+
+.status-inline {
+  @apply mt-3 text-sm;
+}
+
+.status-inline-error {
+  color: #ffb0be;
+}
+
+.status-inline-success {
+  color: #9effc3;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #f5ff4a;
+  outline-offset: 2px;
 }
 
 .arm-loader {
@@ -429,5 +458,14 @@ body {
   background: rgba(216,75,99,0.18);
   border-color: rgba(216,75,99,0.55);
   color: #ffb3c2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 /* ─────────────────────────────────────────────────────────────────────── */
