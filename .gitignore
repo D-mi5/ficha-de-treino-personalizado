@@ -3,3 +3,5 @@ backend/dist/
 .env
 frontend/styles/output.css
 npm-debug.log*
+playwright-report/
+test-results/

@@ -15,7 +15,11 @@ export function registerPageRoutes(app: Express): void {
     res.sendFile(path.resolve("frontend/login.html"));
   });
 
-  app.get("/dashboard", authMiddleware, (_req, res) => {
+  app.get("/dashboard", authMiddleware, (req, res) => {
+    if (!req.userId) {
+      return res.redirect("/entrar");
+    }
+
     res.sendFile(path.resolve("frontend/dashboard.html"));
   });
 }

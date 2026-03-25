@@ -10,16 +10,31 @@ export const profileSchema = z.object({
   observacoes: z.string().max(400).optional(),
 });
 
+export const workoutAnalysisSchema = z.object({
+  imc: z.number().min(10).max(80),
+  classificacaoImc: z.string().min(1).max(120),
+  intensidadeSugerida: z.enum(["leve", "moderada", "intensa"]),
+  progressaoSemanal: z.string().min(1).max(500),
+  contextoClinico: z.string().max(1000).optional(),
+  mensagemAjuste: z.string().max(1000).nullable().optional(),
+});
+
+export const workoutResponseSchema = z.object({
+  workoutPlan: z.string().min(1).max(12000),
+  analysis: workoutAnalysisSchema,
+});
+
 export const historySyncSchema = z.object({
   entries: z
     .array(
       z.object({
-        id: z.string(),
-        createdAt: z.string(),
-        payload: z.object({}).passthrough(),
-        result: z.object({}).passthrough(),
+        id: z.string().min(1).max(120),
+        createdAt: z.string().datetime(),
+        payload: profileSchema.passthrough(),
+        result: workoutResponseSchema,
       }),
     )
+    .max(100)
     .optional(),
 });
 

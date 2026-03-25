@@ -32,6 +32,15 @@ const DEFAULT_CLINICAL_RULES = {
 
 let clinicalRules = { ...DEFAULT_CLINICAL_RULES };
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function getLocalHistory() {
   try {
     const raw = localStorage.getItem(LOCAL_HISTORY_KEY);
@@ -120,7 +129,22 @@ function formatDate(isoString) {
 function toInputDateValue(isoString) {
   const date = new Date(isoString);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseInputDateValue(value, endOfDay = false) {
+  if (!value) return null;
+
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  return endOfDay
+    ? new Date(year, month - 1, day, 23, 59, 59, 999)
+    : new Date(year, month - 1, day, 0, 0, 0, 0);
 }
 
 function formatPeriodLabel(startIso, endIso) {
@@ -146,7 +170,7 @@ function applyAutomaticFilterDefaults(history) {
   const latest = history[0];
   if (filterStartEl) filterStartEl.value = toInputDateValue(oldest.createdAt);
   if (filterEndEl) filterEndEl.value = history.length > 1 ? toInputDateValue(latest.createdAt) : "";
-  if (filterGoalEl) filterGoalEl.value = latest?.payload?.objetivo || "";
+  if (filterGoalEl) filterGoalEl.value = "";
 }
 
 function renderStats(history) {
@@ -358,9 +382,9 @@ function renderProgressEvaluation(history) {
 
   progressGridEl.innerHTML = cards.map((card) => `
         <article class="rounded-xl border border-white/20 bg-black/20 p-4">
-          <p class="text-xs uppercase tracking-[0.2em] text-white/65">${card.title}</p>
-          <p class="mt-2 text-sm font-semibold text-white">${card.isHtmlValue ? card.value : String(card.value)}</p>
-          <p class="mt-2 text-xs text-white/70">${card.subtitle}</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-white/65">${escapeHtml(card.title)}</p>
+          <p class="mt-2 text-sm font-semibold text-white">${card.isHtmlValue ? card.value : escapeHtml(String(card.value))}</p>
+          <p class="mt-2 text-xs text-white/70">${escapeHtml(card.subtitle)}</p>
         </article>
       `).join("");
 
@@ -387,31 +411,32 @@ function renderHistory(history) {
     const dias = entry.payload?.diasSemana || "-";
     const imc = formatImc(entry);
     const preview = buildPlanPreview(entry.result);
+    const safeEntryId = escapeHtml(entry.id);
 
     return `
       <article class="rounded-xl border border-white/20 bg-black/20 p-4">
         <div class="flex items-start justify-between gap-3">
-          <p class="text-xs uppercase tracking-[0.2em] text-white/65">${date}</p>
-          <span class="rounded-full border px-2 py-1 text-xs font-semibold ${objetivoBadgeClass}">${objetivoLabel}</span>
+          <p class="text-xs uppercase tracking-[0.2em] text-white/65">${escapeHtml(date)}</p>
+          <span class="rounded-full border px-2 py-1 text-xs font-semibold ${objetivoBadgeClass}">${escapeHtml(objetivoLabel)}</span>
         </div>
-        <p class="mt-2 text-xs text-white/70">Período: <strong>${periodLabel}</strong></p>
-        <p class="mt-2 text-sm font-semibold text-neonGreen">Cliente: ${nome}</p>
+        <p class="mt-2 text-xs text-white/70">Período: <strong>${escapeHtml(periodLabel)}</strong></p>
+        <p class="mt-2 text-sm font-semibold text-neonGreen">Cliente: ${escapeHtml(nome)}</p>
         <dl class="mt-3 grid gap-2 text-sm text-white/85">
           <div class="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
             <dt class="text-white/70">Objetivo</dt>
-            <dd class="font-semibold">${objetivoLabel}</dd>
+            <dd class="font-semibold">${escapeHtml(objetivoLabel)}</dd>
           </div>
           <div class="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
             <dt class="text-white/70">Dias por semana</dt>
-            <dd class="font-semibold">${dias}</dd>
+            <dd class="font-semibold">${escapeHtml(dias)}</dd>
           </div>
           <div class="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
             <dt class="text-white/70">IMC</dt>
-            <dd class="font-semibold">${imc}</dd>
+            <dd class="font-semibold">${escapeHtml(imc)}</dd>
           </div>
         </dl>
-        <p class="mt-3 text-xs text-white/70 line-clamp-2">${preview}</p>
-        <button data-entry-id="${entry.id}" class="neon-button mt-3 w-full text-sm">
+        <p class="mt-3 text-xs text-white/70 line-clamp-2">${escapeHtml(preview)}</p>
+        <button data-entry-id="${safeEntryId}" class="neon-button mt-3 w-full text-sm">
           Ver Ficha
         </button>
       </article>
@@ -432,13 +457,9 @@ function renderHistory(history) {
 }
 
 function applyFilters() {
-  const startDate = filterStartEl?.value ? new Date(filterStartEl.value) : null;
-  const endDate = filterEndEl?.value ? new Date(filterEndEl.value) : null;
+  const startDate = parseInputDateValue(filterStartEl?.value || "");
+  const endDate = parseInputDateValue(filterEndEl?.value || "", true);
   const goal = filterGoalEl?.value || "";
-
-  if (endDate) {
-    endDate.setHours(23, 59, 59, 999);
-  }
 
   const filtered = allHistory.filter((entry) => {
     const entryDate = new Date(entry.createdAt);

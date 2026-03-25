@@ -17,14 +17,45 @@ export interface Session {
 const usersStore = new Map<string, User>();
 const sessionsStore = new Map<string, Session>();
 
-const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
+const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
 function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex");
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+}
+
+function safeCompareHex(a: string, b: string): boolean {
+  if (a.length !== b.length || a.length % 2 !== 0) {
+    return false;
+  }
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
+  } catch {
+    return false;
+  }
+}
+
+function verifyPassword(password: string, passwordHash: string): boolean {
+  if (passwordHash.startsWith("scrypt$")) {
+    const [, salt, hash] = passwordHash.split("$");
+
+    if (!salt || !hash) {
+      return false;
+    }
+
+    const candidateHash = crypto.scryptSync(password, salt, 64).toString("hex");
+    return safeCompareHex(candidateHash, hash);
+  }
+
+  // Compatibilidade com registros legados em SHA-256.
+  const legacyHash = crypto.createHash("sha256").update(password).digest("hex");
+  return safeCompareHex(legacyHash, passwordHash);
 }
 
 function generateToken(): string {
@@ -39,7 +70,7 @@ export function registerUser(email: string, password: string): User | null {
   }
 
   const user: User = {
-    id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: `user-${crypto.randomUUID()}`,
     email: normalizedEmail,
     passwordHash: hashPassword(password),
     createdAt: new Date().toISOString(),
@@ -53,7 +84,7 @@ export function authenticateUser(email: string, password: string): Session | nul
   const normalizedEmail = normalizeEmail(email);
   const user = usersStore.get(normalizedEmail);
 
-  if (!user || user.passwordHash !== hashPassword(password)) {
+  if (!user || !verifyPassword(password, user.passwordHash)) {
     return null;
   }
 

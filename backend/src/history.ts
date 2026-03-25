@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { ClientProfile, WorkoutResponse } from "./types.js";
 
 interface WorkoutHistoryEntry {
@@ -10,8 +11,8 @@ interface WorkoutHistoryEntry {
 interface SyncHistoryEntryInput {
   id: string;
   createdAt: string;
-  payload: Record<string, unknown>;
-  result: Record<string, unknown>;
+  payload: ClientProfile & Record<string, unknown>;
+  result: WorkoutResponse;
 }
 
 type HistoryMergeEntry = WorkoutHistoryEntry | SyncHistoryEntryInput;
@@ -28,7 +29,7 @@ const historyStore = new Map<string, ClientHistory>();
 const HISTORY_LIMIT = 10;
 
 export function generateClientId(): string {
-  return `client-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return `client-${crypto.randomUUID()}`;
 }
 
 export function getClientHistory(clientId: string): ClientHistory {
@@ -51,7 +52,7 @@ export function addWorkoutToHistory(
   const history = getClientHistory(clientId);
 
   const newEntry: WorkoutHistoryEntry = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
     payload,
     result,
@@ -100,7 +101,7 @@ export function syncClientHistory(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
-  serverHistory.entries = allEntries.slice(0, HISTORY_LIMIT) as WorkoutHistoryEntry[];
+  serverHistory.entries = allEntries.slice(0, HISTORY_LIMIT);
   serverHistory.lastSync = new Date().toISOString();
   historyStore.set(clientId, serverHistory);
 

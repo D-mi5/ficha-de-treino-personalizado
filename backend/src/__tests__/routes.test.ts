@@ -47,6 +47,31 @@ describe("Workout and auth routes", () => {
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
+  it("adds a request id header to responses", async () => {
+    const response = await request(app).get("/api/health");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["x-request-id"]).toMatch(/^[a-zA-Z0-9._-]{8,120}$/);
+  });
+
+  it("allows configured/local development CORS origin", async () => {
+    const response = await request(app)
+      .get("/api/health")
+      .set("Origin", "http://localhost:5173");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
+  });
+
+  it("does not allow unknown CORS origin", async () => {
+    const response = await request(app)
+      .get("/api/health")
+      .set("Origin", "https://evil.example.com");
+
+    expect(response.status).toBe(200);
+    expect(response.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+
   it("generates workout and persists it in client history", async () => {
     const historyResponse = await request(app).get("/api/history");
     const cookies = historyResponse.headers["set-cookie"];
@@ -88,7 +113,14 @@ describe("Workout and auth routes", () => {
       .send(validProfile);
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe("Falha na IA");
+    expect(response.body.error).toBe("Não foi possível gerar a ficha de treino no momento.");
+  });
+
+  it("redirects /dashboard page when user is not authenticated", async () => {
+    const response = await request(app).get("/dashboard");
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe("/entrar");
   });
 
   it("registers user with hardened cookie attributes", async () => {
@@ -144,5 +176,28 @@ describe("Workout and auth routes", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe("Dados inválidos");
+  });
+
+  it("writes audit log for sensitive auth routes with masked email", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const email = `audit-${Date.now()}@example.com`;
+
+    await request(app)
+      .post("/api/auth/register")
+      .send({ email, password: "12345678" });
+
+    const auditCall = logSpy.mock.calls.find(([line]) => {
+      return (
+        typeof line === "string" &&
+        line.includes('"msg":"audit_event"') &&
+        line.includes('"path":"/api/auth/register"')
+      );
+    });
+
+    expect(auditCall).toBeTruthy();
+    expect(String(auditCall?.[0])).toContain('"email":"au***@example.com"');
+    expect(String(auditCall?.[0])).toContain('"requestId"');
+
+    logSpy.mockRestore();
   });
 });

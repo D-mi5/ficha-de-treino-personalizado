@@ -60,7 +60,7 @@ describe("Schema validation", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("accepts history sync payload with passthrough fields", () => {
+  it("accepts history sync payload with valid profile/result", () => {
     const parsed = historySyncSchema.safeParse({
       entries: [
         {
@@ -68,17 +68,52 @@ describe("Schema validation", () => {
           createdAt: new Date().toISOString(),
           payload: {
             idade: 28,
+            peso: 62,
+            altura: 1.65,
+            objetivo: "hipertrofia",
+            nivel: "intermediario",
+            diasSemana: 4,
             custom: "extra",
           },
           result: {
             workoutPlan: "Treino A",
-            analysis: { imc: 22.8 },
+            analysis: {
+              imc: 22.8,
+              classificacaoImc: "peso adequado",
+              intensidadeSugerida: "moderada",
+              progressaoSemanal: "Aumentar 3% por semana",
+            },
           },
         },
       ],
     });
 
     expect(parsed.success).toBe(true);
+  });
+
+  it("rejects history sync payload when profile is incomplete", () => {
+    const parsed = historySyncSchema.safeParse({
+      entries: [
+        {
+          id: "entry-1",
+          createdAt: new Date().toISOString(),
+          payload: {
+            idade: 28,
+          },
+          result: {
+            workoutPlan: "Treino A",
+            analysis: {
+              imc: 22.8,
+              classificacaoImc: "peso adequado",
+              intensidadeSugerida: "moderada",
+              progressaoSemanal: "Aumentar 3% por semana",
+            },
+          },
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
   });
 
 });
