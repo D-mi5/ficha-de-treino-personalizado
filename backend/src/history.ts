@@ -12,7 +12,7 @@ interface SyncHistoryEntryInput {
   id: string;
   createdAt: string;
   payload: ClientProfile & Record<string, unknown>;
-  result: WorkoutResponse;
+  result: WorkoutResponse | Record<string, unknown>;
 }
 
 type HistoryMergeEntry = WorkoutHistoryEntry | SyncHistoryEntryInput;
@@ -27,6 +27,45 @@ interface ClientHistory {
 const historyStore = new Map<string, ClientHistory>();
 
 const HISTORY_LIMIT = 10;
+
+function getWorkoutPlanSignature(workoutPlan: unknown): string {
+  if (typeof workoutPlan === "string") {
+    return workoutPlan.trim();
+  }
+
+  try {
+    return JSON.stringify(workoutPlan);
+  } catch {
+    return String(workoutPlan || "");
+  }
+}
+
+function isWorkoutResponseLike(value: unknown): value is WorkoutResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const analysis = candidate.analysis;
+
+  return (
+    (typeof candidate.workoutPlan === "string" || typeof candidate.workoutPlan === "object")
+    && Boolean(analysis && typeof analysis === "object")
+  );
+}
+
+function normalizeHistoryEntry(entry: HistoryMergeEntry): WorkoutHistoryEntry | null {
+  if (!isWorkoutResponseLike(entry.result)) {
+    return null;
+  }
+
+  return {
+    id: entry.id,
+    createdAt: entry.createdAt,
+    payload: entry.payload,
+    result: entry.result,
+  };
+}
 
 export function generateClientId(): string {
   return `client-${crypto.randomUUID()}`;
@@ -59,7 +98,8 @@ export function addWorkoutToHistory(
   };
 
   // Remover duplicatas baseado no plano de treino
-  history.entries = history.entries.filter((e) => e.result.workoutPlan !== result.workoutPlan);
+  const newSignature = getWorkoutPlanSignature(result.workoutPlan);
+  history.entries = history.entries.filter((e) => getWorkoutPlanSignature(e.result.workoutPlan) !== newSignature);
 
   // Adicionar novo entry no começo
   history.entries.unshift(newEntry);
@@ -101,7 +141,10 @@ export function syncClientHistory(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
-  serverHistory.entries = allEntries.slice(0, HISTORY_LIMIT);
+  serverHistory.entries = allEntries
+    .map((entry) => normalizeHistoryEntry(entry))
+    .filter((entry): entry is WorkoutHistoryEntry => Boolean(entry))
+    .slice(0, HISTORY_LIMIT);
   serverHistory.lastSync = new Date().toISOString();
   historyStore.set(clientId, serverHistory);
 

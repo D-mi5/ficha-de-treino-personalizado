@@ -12,48 +12,100 @@
   <body class="page-shell">
     <main class="page-main mx-auto max-w-md">
       <!-- Adicionado design moderno Ficha Femme: badge + gradiente -->
-      <div class="glow-panel cta-gradient p-6 sm:p-8">
-        <span class="femme-badge mb-3 inline-block">Seu espaço de evolução</span>
-        <h1 class="mb-2 mt-3 text-2xl font-extrabold">Entre e acompanhe sua evolução</h1>
-        <p class="mb-6 text-sm text-white/80">Entre para acompanhar suas fichas e manter consistência nos treinos.</p>
+      <div class="glow-panel auth-card cta-gradient p-6 sm:p-8">
+        <span class="femme-badge mb-3 inline-block w-full text-center">Ative sua conta de evolucao</span>
+        <h1 class="mb-2 mt-3 text-center text-2xl font-extrabold">Planejamento inteligente para sua rotina de treinos</h1>
+        <p class="mb-2 text-center text-sm text-white/80">Cadastre-se para acessar fichas personalizadas, historico completo e acompanhamento continuo.</p>
+        <p class="mb-6 text-center text-xs text-white/65">Seguranca no acesso, sincronizacao automatica e disponibilidade mesmo sem internet.</p>
 
         <div class="mb-6 flex gap-2">
-          <button id="tab-login" class="tab-button active flex-1 rounded-lg border border-neonGreen/60 px-4 py-2 text-sm font-semibold text-neonGreen">
-            Entrar
-          </button>
-          <button id="tab-signup" class="tab-button flex-1 rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
+          <button id="tab-signup" class="tab-button active flex-1 rounded-lg border border-neonGreen/60 px-4 py-2 text-sm font-semibold text-neonGreen transition-colors">
             Criar conta
+          </button>
+          <button id="tab-login" class="tab-button flex-1 rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
+            Entrar
           </button>
         </div>
 
-        <form id="login-form" class="space-y-4" novalidate>
-          <label class="space-y-2">
-            <span class="text-sm">E-mail</span>
-            <input id="login-email" class="input-field" type="email" placeholder="seu@email.com" required />
-          </label>
-          <label class="space-y-2">
-            <span class="text-sm">Senha</span>
-            <input id="login-password" class="input-field" type="password" placeholder="••••••••" required />
-          </label>
-          <button id="login-submit" type="submit" class="neon-button w-full">Entrar na minha conta</button>
-          <p id="login-error" class="status-inline hidden" role="alert" aria-live="assertive"></p>
-        </form>
-
-        <form id="signup-form" class="hidden space-y-4" novalidate>
+        <form id="signup-form" class="space-y-4" novalidate>
           <label class="space-y-2">
             <span class="text-sm">E-mail</span>
             <input id="signup-email" class="input-field" type="email" placeholder="seu@email.com" required />
           </label>
           <label class="space-y-2">
             <span class="text-sm">Senha (mín. 6 caracteres)</span>
-            <input id="signup-password" class="input-field" type="password" placeholder="••••••••" minlength="6" required />
+            <div class="password-field-wrap">
+              <input id="signup-password" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required />
+              <button id="signup-password-toggle" class="password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false">
+                <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg class="password-toggle-icon icon-eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.584 10.587A2.25 2.25 0 0012 14.25a2.25 2.25 0 001.413-3.666" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 5.09A10.477 10.477 0 0112 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639a11.967 11.967 0 01-3.004 4.321M6.228 6.228a11.95 11.95 0 00-4.192 5.455 1.012 1.012 0 000 .639C3.423 16.49 7.36 19.5 12 19.5a10.47 10.47 0 005.311-1.449" />
+                </svg>
+                <span class="sr-only">Alternar visibilidade da senha</span>
+              </button>
+            </div>
+            <p class="text-xs text-white/65">Use números, letras e caracteres especiais para uma senha mais forte.</p>
           </label>
+          <div id="signup-password-strength" class="password-strength hidden" aria-live="polite">
+            <div class="password-strength-track">
+              <div id="signup-password-strength-bar" class="password-strength-bar"></div>
+            </div>
+            <p id="signup-password-strength-label" class="mt-1 text-xs text-white/70">Força da senha</p>
+          </div>
           <label class="space-y-2">
             <span class="text-sm">Confirmar Senha</span>
-            <input id="signup-password-confirm" class="input-field" type="password" placeholder="••••••••" minlength="6" required />
+            <div class="password-field-wrap">
+              <input id="signup-password-confirm" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required />
+              <button id="signup-password-confirm-toggle" class="password-toggle" type="button" aria-label="Mostrar confirmação de senha" aria-pressed="false">
+                <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg class="password-toggle-icon icon-eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.584 10.587A2.25 2.25 0 0012 14.25a2.25 2.25 0 001.413-3.666" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 5.09A10.477 10.477 0 0112 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639a11.967 11.967 0 01-3.004 4.321M6.228 6.228a11.95 11.95 0 00-4.192 5.455 1.012 1.012 0 000 .639C3.423 16.49 7.36 19.5 12 19.5a10.47 10.47 0 005.311-1.449" />
+                </svg>
+                <span class="sr-only">Alternar visibilidade da confirmação de senha</span>
+              </button>
+            </div>
           </label>
           <button id="signup-submit" type="submit" class="neon-button w-full">Criar minha conta</button>
+          <p class="text-center text-xs text-white/60">Após o cadastro, suas próximas fichas ficam disponíveis no histórico do app e offline.</p>
           <p id="signup-error" class="status-inline hidden" role="alert" aria-live="assertive"></p>
+        </form>
+
+        <form id="login-form" class="hidden space-y-4" novalidate>
+          <label class="space-y-2">
+            <span class="text-sm">E-mail</span>
+            <input id="login-email" class="input-field" type="email" placeholder="seu@email.com" required />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm">Senha</span>
+            <div class="password-field-wrap">
+              <input id="login-password" class="input-field pr-11" type="password" placeholder="••••••••" required />
+              <button id="login-password-toggle" class="password-toggle" type="button" aria-label="Mostrar senha de login" aria-pressed="false">
+                <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg class="password-toggle-icon icon-eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.584 10.587A2.25 2.25 0 0012 14.25a2.25 2.25 0 001.413-3.666" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 5.09A10.477 10.477 0 0112 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639a11.967 11.967 0 01-3.004 4.321M6.228 6.228a11.95 11.95 0 00-4.192 5.455 1.012 1.012 0 000 .639C3.423 16.49 7.36 19.5 12 19.5a10.47 10.47 0 005.311-1.449" />
+                </svg>
+                <span class="sr-only">Alternar visibilidade da senha de login</span>
+              </button>
+            </div>
+          </label>
+          <button id="login-submit" type="submit" class="neon-button w-full">Entrar na minha conta</button>
+          <p class="text-center text-xs text-white/60">Seus dados de treino ficam protegidos e organizados no seu histórico.</p>
+          <p id="login-error" class="status-inline hidden" role="alert" aria-live="assertive"></p>
         </form>
 
         <div class="mt-6 border-t border-white/20 pt-6">
@@ -63,7 +115,7 @@
     </main>
 
     <script src="./scripts/pwa.js?v=20260324-7"></script>
-    <script src="./scripts/api-client.js"></script>
-    <script src="./scripts/auth.js"></script>
+    <script src="./scripts/api-client.js?v=20260325-5"></script>
+    <script src="./scripts/auth.js?v=20260325-5"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { ClientProfile, Intensidade } from "./types.js";
+import { ClientProfile, Intensidade, NivelRisco, Objetivo } from "./types.js";
 import { calcularIMC } from "./utils.js";
 import { CLINICAL_RULES } from "./clinical-rules.js";
 
@@ -9,6 +9,11 @@ export interface ProfileAnalysis {
   progressaoSemanal: string;
   contextoClinico: string;
   mensagemAjuste: string | null;
+  objetivoFinal: Objetivo;
+  diasTreinoAjustados: number;
+  motivoAjusteDiasTreino: string | null;
+  nivelRisco: NivelRisco;
+  comentariosEssenciais: string[];
 }
 
 interface ClinicalFlags {
@@ -66,9 +71,17 @@ function suggestIntensity(profile: ClientProfile, imc: number): Intensidade {
   if (imc >= CLINICAL_RULES.imcObesidade) return "moderada";
   if (imc < CLINICAL_RULES.imcDesnutricao) return "leve";
   if (profile.nivel === "iniciante") return "leve";
+  if (profile.idade >= CLINICAL_RULES.idadeRecuperacaoArticularMin) {
+    return profile.nivel === "avancado" ? "moderada" : "leve";
+  }
+  if (profile.idade <= CLINICAL_RULES.idadeAvancadoIntensaMax) {
+    if (profile.nivel === "intermediario") return "moderada";
+    if (profile.nivel === "avancado" && profile.idade <= CLINICAL_RULES.idadeJovemIntensaMax) return "intensa";
+    if (profile.nivel === "avancado") return "moderada";
+  }
   if (profile.nivel === "intermediario") return "moderada";
   if (profile.nivel === "avancado") {
-    return profile.idade <= CLINICAL_RULES.idadeAvancadoIntensaMax ? "intensa" : "moderada";
+    return profile.idade <= CLINICAL_RULES.idadeJovemIntensaMax ? "intensa" : "moderada";
   }
 
   return getIntensidade(profile.idade, imc);
@@ -154,6 +167,7 @@ export function resolveObjectiveConflict(
 function buildClinicalContext(imc: number, profile: ClientProfile): string {
   const flags = getClinicalFlags(profile, imc);
   const notes: string[] = [];
+  const focoTreino = profile.focoTreino || "nenhum";
 
   if (flags.idosa) {
     notes.push("Cliente idosa. Prioridade absoluta em segurança, mobilidade, equilíbrio e prevenção de quedas.");
@@ -179,6 +193,10 @@ function buildClinicalContext(imc: number, profile: ClientProfile): string {
 
   if (flags.comorbidade) {
     notes.push("Possível comorbidade. Treino deve ser conservador com monitoramento.");
+  }
+
+  if (focoTreino !== "nenhum" && (profile.nivel === "intermediario" || profile.nivel === "avancado")) {
+    notes.push(`Cliente solicitou ênfase em ${focoTreino}. Ajustar volume e seleção de exercícios para priorizar esse grupamento.`);
   }
 
   const isSaudavel = !flags.idosa && !flags.obesidade && !flags.desnutricao && !flags.riscoArticular && !flags.comorbidade;
@@ -234,6 +252,14 @@ export function adjustTrainingDays(
     };
   }
 
+  if (flags.riscoArticular) {
+    const ajustado = Math.min(dias, 4);
+    return {
+      diasAjustados: ajustado,
+      motivo: ajustado < dias ? "Dor ou risco articular exige melhor distribuição de recuperação entre os treinos." : null,
+    };
+  }
+
   if (profile.nivel === "iniciante") {
     const ajustado = Math.min(dias, 4);
     return {
@@ -242,7 +268,63 @@ export function adjustTrainingDays(
     };
   }
 
+  if (imc < CLINICAL_RULES.imcDesnutricao) {
+    const ajustado = Math.min(dias, 4);
+    return {
+      diasAjustados: ajustado,
+      motivo: ajustado < dias ? "Baixo peso pede frequência moderada para preservar recuperação e favorecer ganho de massa." : null,
+    };
+  }
+
   return { diasAjustados: dias, motivo: null };
+}
+
+function resolveRiskLevel(profile: ClientProfile, imc: number): NivelRisco {
+  const flags = getClinicalFlags(profile, imc);
+
+  if (flags.idosa || flags.comorbidade || imc >= CLINICAL_RULES.imcRiscoMaximo) {
+    return "alto";
+  }
+
+  if (flags.riscoArticular || flags.obesidade || flags.desnutricao || profile.idade >= CLINICAL_RULES.idadeRecuperacaoArticularMin || profile.nivel === "iniciante") {
+    return "moderado";
+  }
+
+  return "baixo";
+}
+
+function buildEssentialComments(profile: ClientProfile, imc: number, intensidade: Intensidade, daysAdjustmentReason: string | null): string[] {
+  const flags = getClinicalFlags(profile, imc);
+  const comments: string[] = [];
+
+  if (daysAdjustmentReason) {
+    comments.push(daysAdjustmentReason);
+  }
+
+  if (profile.nivel === "iniciante") {
+    comments.push("Priorize técnica, mobilidade e controle do movimento antes de aumentar a carga.");
+  }
+
+  if (flags.riscoArticular) {
+    comments.push("Evite impacto nas articulações sensíveis e prefira execução controlada, com amplitude segura.");
+  }
+
+  if (flags.idosa) {
+    comments.push("Mantenha foco em segurança cardiovascular, equilíbrio e recuperação entre as sessões.");
+  }
+
+  if (flags.obesidade) {
+    comments.push("Cardio e musculação devem respeitar tolerância articular, fadiga e progressão gradual.");
+  }
+
+  if (flags.desnutricao) {
+    comments.push("A evolução do treino deve caminhar junto com recuperação, ingestão alimentar adequada e supervisão profissional.");
+  }
+
+  comments.push(`A intensidade sugerida para o momento é ${intensidade}, com progressão baseada em execução segura e constância.`);
+  comments.push("Mantenha hidratação, sono e regularidade para que a evolução corporal aconteça com segurança.");
+
+  return comments.slice(0, 5);
 }
 
 function buildMensagemAjuste(
@@ -259,9 +341,12 @@ function buildMensagemAjuste(
 
 export function analyzeProfile(profile: ClientProfile): ProfileAnalysis {
   const { imc, classificacao } = calcularIMC(profile.peso, profile.altura);
-  const intensidadeSugerida = suggestIntensity(profile, imc);
   const conflito = resolveObjectiveConflict(profile.idade, imc, profile.objetivo);
+  const objetivoFinal = conflito.objetivoAjustado as Objetivo;
+  const { diasAjustados, motivo } = adjustTrainingDays(profile.diasSemana, profile, imc);
+  const intensidadeSugerida = suggestIntensity(profile, imc);
   const mensagemAjuste = buildMensagemAjuste(profile.objetivo, conflito.objetivoAjustado, conflito.motivo);
+  const nivelRisco = resolveRiskLevel(profile, imc);
 
   return {
     imc,
@@ -270,5 +355,10 @@ export function analyzeProfile(profile: ClientProfile): ProfileAnalysis {
     progressaoSemanal: suggestProgression(profile, intensidadeSugerida, imc),
     contextoClinico: buildClinicalContext(imc, profile),
     mensagemAjuste,
+    objetivoFinal,
+    diasTreinoAjustados: diasAjustados,
+    motivoAjusteDiasTreino: motivo,
+    nivelRisco,
+    comentariosEssenciais: buildEssentialComments(profile, imc, intensidadeSugerida, motivo),
   };
 }

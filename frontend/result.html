@@ -21,6 +21,9 @@
           <button id="install-app" class="hidden rounded-lg border border-neonGreen/70 px-4 py-2 text-sm font-semibold text-neonGreen">
             Instalar aplicativo
           </button>
+          <a href="/dashboard" class="w-full rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25 sm:w-auto">
+            Minha evolução
+          </a>
           <a href="/" class="w-full rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25 sm:w-auto">Voltar ao início</a>
         </div>
       </header>
@@ -35,6 +38,7 @@
         <div class="mb-4 flex items-center gap-3">
           <span class="femme-badge">Ficha gerada ✔</span>
         </div>
+        <p id="client-greeting" class="mb-2 text-base font-semibold text-white/90"></p>
         <h2 class="mb-2 text-2xl font-bold text-neonGreen">Sua ficha exclusiva</h2>
         <p class="mb-4 text-sm text-white/80">Siga essa estrutura por algumas semanas para perceber sua evolução com mais consistência.</p>
         <div class="tablet-grid-2 mb-6 grid gap-3 lg:grid-cols-3">
@@ -51,6 +55,9 @@
             <p id="progression-value" class="mt-2 text-sm font-semibold text-white"></p>
           </div>
         </div>
+        <div id="adjustment-card" class="mb-4 hidden"></div>
+        <div id="analysis-cards" class="mb-4 grid gap-3 md:grid-cols-2"></div>
+        <div id="support-cards" class="mb-6 grid gap-3 md:grid-cols-3"></div>
         <div id="workout-content" class="space-y-5 text-sm md:text-base"></div>
       </section>
 
@@ -74,8 +81,8 @@
       </section>
     </main>
 
-    <script src="./scripts/api-client.js?v=20260324-2"></script>
-    <script src="./scripts/result.js?v=20260324-2"></script>
+    <script src="./scripts/api-client.js?v=20260325-5"></script>
+    <script src="./scripts/result.js?v=20260325-6"></script>
     <script src="./scripts/pwa.js?v=20260324-7"></script>
   </body>
 </html>

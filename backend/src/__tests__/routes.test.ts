@@ -113,7 +113,7 @@ describe("Workout and auth routes", () => {
       .send(validProfile);
 
     expect(response.status).toBe(500);
-    expect(response.body.error).toBe("Não foi possível gerar a ficha de treino no momento.");
+    expect(response.body.error).toContain("Não foi possível gerar a ficha de treino no momento.");
   });
 
   it("redirects /dashboard page when user is not authenticated", async () => {

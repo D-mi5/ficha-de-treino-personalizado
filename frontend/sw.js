@@ -1,4 +1,4 @@
-const CACHE_NAME = "treino-feminino-v36";
+const CACHE_NAME = "treino-feminino-v43";
 const ASSETS_TO_CACHE = [
   "/",
   "/form",
@@ -40,6 +40,22 @@ self.addEventListener("fetch", (event) => {
   }
 
   const isNavigationRequest = event.request.mode === "navigate";
+
+  // Para páginas HTML, prioriza rede para evitar tela antiga em rotas como /entrar.
+  if (isNavigationRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(async () => (await caches.match(event.request)) || (await caches.match("/offline.html"))),
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

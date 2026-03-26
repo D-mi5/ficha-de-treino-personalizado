@@ -32,6 +32,11 @@
         </div>
 
         <form id="workout-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:gap-6" novalidate>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm">Nome da cliente</span>
+            <input class="input-field" name="nome" type="text" minlength="2" maxlength="80" placeholder="Ex.: Ana Carolina" required />
+          </label>
+
           <label class="space-y-2">
             <span class="text-sm">Idade</span>
             <input class="input-field" name="idade" type="number" min="14" max="85" required />
@@ -74,6 +79,19 @@
             </select>
           </label>
 
+          <label id="foco-treino-wrapper" class="hidden space-y-2">
+            <span class="text-sm">Foco de treino (ênfase)</span>
+            <select id="foco-treino-select" class="input-field" name="focoTreino" disabled>
+              <option value="nenhum">Nenhum desses</option>
+              <option value="quadriceps">Quadríceps</option>
+              <option value="gluteo">Glúteo</option>
+              <option value="posteriores">Posteriores</option>
+              <option value="costas">Costas</option>
+              <option value="peito">Peito</option>
+            </select>
+            <p class="text-xs text-white/65">Disponível para nível intermediário e avançado.</p>
+          </label>
+
           <label class="space-y-2">
             <span class="text-sm">Dias por semana</span>
             <select class="input-field" name="diasSemana" required>
@@ -82,6 +100,15 @@
               <option value="4">4</option>
               <option value="5">5</option>
               <option value="6">6</option>
+            </select>
+          </label>
+
+          <label class="space-y-2">
+            <span class="text-sm">Periodicidade da nova ficha</span>
+            <select class="input-field" name="periodicidade" required>
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal</option>
+              <option value="mensal">Mensal</option>
             </select>
           </label>
 
@@ -99,7 +126,7 @@
       </section>
     </main>
 
-    <script src="./scripts/form.js"></script>
+    <script src="./scripts/form.js?v=20260325-2"></script>
     <script src="./scripts/pwa.js?v=20260324-7"></script>
   </body>
 </html>

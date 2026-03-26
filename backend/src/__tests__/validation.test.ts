@@ -9,6 +9,7 @@ describe("Schema validation", () => {
       altura: 1.68,
       objetivo: "definicao",
       nivel: "intermediario",
+      focoTreino: "gluteo",
       diasSemana: 4,
       observacoes: "Sem restricoes clinicas relevantes",
     });
@@ -24,6 +25,20 @@ describe("Schema validation", () => {
       objetivo: "forca",
       nivel: "intermediario",
       diasSemana: 4,
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects focoTreino for iniciantes when different from nenhum", () => {
+    const parsed = profileSchema.safeParse({
+      idade: 26,
+      peso: 62,
+      altura: 1.66,
+      objetivo: "emagrecimento",
+      nivel: "iniciante",
+      focoTreino: "gluteo",
+      diasSemana: 3,
     });
 
     expect(parsed.success).toBe(false);

@@ -18,13 +18,13 @@
           </a>
         </div>
         <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <a id="go-ready-result" href="/resultado" class="rounded-lg border border-white/30 px-4 py-2 text-center text-sm font-semibold text-white">
+          <a id="go-ready-result" href="/resultado" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
             Voltar para ficha pronta
           </a>
           <a href="/form" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
             Nova ficha
           </a>
-          <button id="logout-btn" class="rounded-lg border border-red-300/60 px-4 py-2 text-center text-sm font-semibold text-red-300">
+          <button id="logout-btn" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-center text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
             Sair
           </button>
         </div>
@@ -63,9 +63,6 @@
             </label>
           </div>
           <div class="mt-4 flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            <button id="apply-filters" class="neon-button w-full sm:w-auto">
-              Aplicar Filtros
-            </button>
             <button id="clear-filters" class="rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
               Limpar filtros
             </button>
@@ -106,7 +103,7 @@
       <section id="unauthorized" class="glow-panel hidden p-8 text-center">
         <h2 class="text-xl font-bold text-red-300">Acesso negado</h2>
         <p class="mt-2 text-white/90">Entre na sua conta para acompanhar suas fichas e sua evolução.</p>
-        <a href="/entrar?mode=login&next=/dashboard" class="neon-button mt-4 inline-block">
+        <a href="/entrar?mode=login&next=/dashboard" class="mt-4 inline-block rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
           Ir para o login
         </a>
       </section>
@@ -114,14 +111,14 @@
       <section id="dashboard-error" class="glow-panel hidden p-8 text-center" role="alert" aria-live="assertive">
         <h2 class="text-xl font-bold text-red-300">Não foi possível carregar o dashboard</h2>
         <p id="dashboard-error-message" class="mt-2 text-white/90">Tente novamente em instantes.</p>
-        <button id="retry-dashboard" class="neon-button mt-4 inline-flex">
+        <button id="retry-dashboard" class="mt-4 inline-flex rounded-lg border border-rose-700/50 bg-lilac/15 px-4 py-2 text-sm font-semibold text-white/80 transition-colors hover:border-rose-600/70 hover:bg-lilac/25">
           Tentar novamente
         </button>
       </section>
     </main>
 
     <script src="./scripts/pwa.js?v=20260324-7"></script>
-    <script src="./scripts/api-client.js?v=20260324-2"></script>
+    <script src="./scripts/api-client.js?v=20260325-5"></script>
     <script src="./scripts/dashboard.js?v=20260324-2"></script>
   </body>
 </html>

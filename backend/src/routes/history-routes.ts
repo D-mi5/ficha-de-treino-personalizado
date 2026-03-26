@@ -3,17 +3,20 @@ import { createAuditMiddleware } from "../audit.js";
 import { getClientHistory, syncClientHistory } from "../history.js";
 import { logger } from "../logger.js";
 import { historySyncSchema } from "../schemas.js";
+import { respondMissingClientId, respondValidationError } from "./route-helpers.js";
+
+const HISTORY_ROUTE = "/api/history";
+const HISTORY_SYNC_ROUTE = "/api/history/sync";
 
 export function registerHistoryRoutes(app: Express): void {
-  app.get("/api/history", (req, res) => {
+  app.get(HISTORY_ROUTE, (req, res) => {
     if (!req.clientId) {
-      logger.warn("history_missing_client_id", { route: "/api/history", requestId: req.requestId });
-      return res.status(400).json({ error: "clientId inválido" });
+      return respondMissingClientId(req, res, HISTORY_ROUTE, "history_missing_client_id");
     }
 
     const history = getClientHistory(req.clientId);
     logger.debug("history_fetched", {
-      route: "/api/history",
+      route: HISTORY_ROUTE,
       requestId: req.requestId,
       clientId: req.clientId,
       entries: history.entries.length,
@@ -22,31 +25,27 @@ export function registerHistoryRoutes(app: Express): void {
     return res.json(history);
   });
 
-  app.post("/api/history/sync", createAuditMiddleware("history_sync"), (req, res) => {
+  app.post(HISTORY_SYNC_ROUTE, createAuditMiddleware("history_sync"), (req, res) => {
     if (!req.clientId) {
-      logger.warn("history_sync_missing_client_id", { route: "/api/history/sync", requestId: req.requestId });
-      return res.status(400).json({ error: "clientId inválido" });
+      return respondMissingClientId(req, res, HISTORY_SYNC_ROUTE, "history_sync_missing_client_id");
     }
 
     const parsed = historySyncSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      logger.warn("history_sync_validation_failed", {
-        route: "/api/history/sync",
-        requestId: req.requestId,
-        clientId: req.clientId,
-      });
-
-      return res.status(400).json({
-        error: "Dados inválidos",
-        issues: parsed.error.flatten(),
-      });
+      return respondValidationError(
+        req,
+        res,
+        HISTORY_SYNC_ROUTE,
+        "history_sync_validation_failed",
+        parsed.error.flatten(),
+      );
     }
 
     const entries = parsed.data.entries || [];
     const history = syncClientHistory(req.clientId, entries);
     logger.info("history_sync_success", {
-      route: "/api/history/sync",
+      route: HISTORY_SYNC_ROUTE,
       requestId: req.requestId,
       clientId: req.clientId,
       receivedEntries: entries.length,

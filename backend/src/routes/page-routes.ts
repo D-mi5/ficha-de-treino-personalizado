@@ -15,6 +15,10 @@ export function registerPageRoutes(app: Express): void {
     res.sendFile(path.resolve("frontend/login.html"));
   });
 
+  app.get("/historico-offline", (_req, res) => {
+    res.sendFile(path.resolve("frontend/offline-history.html"));
+  });
+
   app.get("/dashboard", authMiddleware, (req, res) => {
     if (!req.userId) {
       return res.redirect("/entrar");

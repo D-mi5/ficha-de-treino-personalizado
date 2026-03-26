@@ -32,6 +32,14 @@ function getAllowedCorsOrigins(): string[] {
   return [];
 }
 
+function isDevelopmentLocalOrigin(origin: string): boolean {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+}
+
 export function createApp(): Express {
   const app = express();
   const allowedOrigins = getAllowedCorsOrigins();
@@ -54,7 +62,7 @@ export function createApp(): Express {
           return;
         }
 
-        if (allowedOrigins.includes(origin)) {
+        if (allowedOrigins.includes(origin) || isDevelopmentLocalOrigin(origin)) {
           logger.debug("cors_origin_allowed", { origin });
           callback(null, true);
           return;

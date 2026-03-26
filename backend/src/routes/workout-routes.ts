@@ -6,26 +6,26 @@ import { logger } from "../logger.js";
 import { generateWorkoutRateLimiter } from "../rate-limiters.js";
 import { ClientProfile } from "../types.js";
 import { profileSchema } from "../schemas.js";
+import { respondValidationError } from "./route-helpers.js";
+
+const WORKOUT_ROUTE = "/api/generate-workout";
 
 export function registerWorkoutRoutes(app: Express): void {
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, service: "workout-generator" });
   });
 
-  app.post("/api/generate-workout", generateWorkoutRateLimiter, createAuditMiddleware("generate_workout"), async (req, res) => {
+  app.post(WORKOUT_ROUTE, generateWorkoutRateLimiter, createAuditMiddleware("generate_workout"), async (req, res) => {
     const parsed = profileSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      logger.warn("generate_workout_validation_failed", {
-        route: "/api/generate-workout",
-        requestId: req.requestId,
-        clientId: req.clientId,
-      });
-
-      return res.status(400).json({
-        error: "Dados inválidos",
-        issues: parsed.error.flatten(),
-      });
+      return respondValidationError(
+        req,
+        res,
+        WORKOUT_ROUTE,
+        "generate_workout_validation_failed",
+        parsed.error.flatten(),
+      );
     }
 
     try {
@@ -37,7 +37,7 @@ export function registerWorkoutRoutes(app: Express): void {
       }
 
       logger.info("generate_workout_success", {
-        route: "/api/generate-workout",
+        route: WORKOUT_ROUTE,
         requestId: req.requestId,
         clientId: req.clientId,
         objetivo: profile.objetivo,
@@ -46,14 +46,26 @@ export function registerWorkoutRoutes(app: Express): void {
 
       return res.json(result);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isTimeout = errorMessage.includes("Timeout");
+      const isProviderUnavailable = /503|service unavailable|temporarily unavailable|rate limit|429/i.test(errorMessage);
+      const statusCode = isTimeout ? 504 : isProviderUnavailable ? 503 : 500;
+
       logger.error("generate_workout_failed", {
-        route: "/api/generate-workout",
+        route: WORKOUT_ROUTE,
         requestId: req.requestId,
         clientId: req.clientId,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
+        isTimeout,
       });
 
-      return res.status(500).json({ error: "Não foi possível gerar a ficha de treino no momento." });
+      const userMessage = isTimeout
+        ? "A IA levou muito tempo para responder. Tente novamente em alguns instantes."
+        : isProviderUnavailable
+          ? "O provedor de IA está instável no momento (503/limite). Tente novamente em alguns instantes."
+          : "Não foi possível gerar a ficha de treino no momento. Tente novamente mais tarde.";
+
+      return res.status(statusCode).json({ error: userMessage });
     }
   });
 }

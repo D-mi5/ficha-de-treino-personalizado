@@ -8,7 +8,6 @@ const retryDashboardEl = document.getElementById("retry-dashboard");
 const filterStartEl = document.getElementById("filter-start");
 const filterEndEl = document.getElementById("filter-end");
 const filterGoalEl = document.getElementById("filter-goal");
-const applyFiltersEl = document.getElementById("apply-filters");
 const clearFiltersEl = document.getElementById("clear-filters");
 
 const statTotalEl = document.getElementById("stat-total");
@@ -84,6 +83,18 @@ function buildPlanPreview(result) {
     const text = workoutPlan.trim();
     return text.length > 100 ? `${text.slice(0, 100)}...` : text || "Sem resumo disponível";
   }
+
+  if (workoutPlan && typeof workoutPlan === "object") {
+    const parts = [
+      String(workoutPlan?.analise || "").trim(),
+      String(workoutPlan?.estrategia || "").trim(),
+      String(workoutPlan?.ciclo || "").trim(),
+    ].filter(Boolean);
+
+    const text = parts.join(" ").trim();
+    return text.length > 100 ? `${text.slice(0, 100)}...` : text || "Sem resumo disponível";
+  }
+
   return "Sem resumo disponível";
 }
 
@@ -156,9 +167,48 @@ function formatPeriodLabel(startIso, endIso) {
   return `${startLabel} até ${endLabel}`;
 }
 
-function getEntryEndDate(history, index) {
+function getCadenceDays(periodicidade) {
+  if (periodicidade === "quinzenal") return 14;
+  if (periodicidade === "mensal") return 30;
+  return 7;
+}
+
+function getCadenceLabel(periodicidade) {
+  if (periodicidade === "quinzenal") return "Quinzenal";
+  if (periodicidade === "mensal") return "Mensal";
+  return "Semanal";
+}
+
+function getEntryPeriodicidade(entry) {
+  return String(entry?.payload?.periodicidade || "semanal").toLowerCase();
+}
+
+function getProjectedEndDate(startIso, periodicidade) {
+  const startDate = new Date(startIso);
+  if (Number.isNaN(startDate.getTime())) return null;
+
+  const endDate = new Date(startDate);
+  const cadenceDays = getCadenceDays(periodicidade);
+  endDate.setDate(endDate.getDate() + cadenceDays - 1);
+  return endDate.toISOString();
+}
+
+function getEntryEndDate(entry, history, index) {
+  const projectedEnd = getProjectedEndDate(entry.createdAt, getEntryPeriodicidade(entry));
+
+  if (index === 0) {
+    if (!projectedEnd) return null;
+    const now = new Date();
+    return now <= new Date(projectedEnd) ? null : projectedEnd;
+  }
+
   const previousNewer = history[index - 1];
-  return previousNewer?.createdAt || null;
+  const previousDate = previousNewer?.createdAt ? new Date(previousNewer.createdAt) : null;
+  if (projectedEnd && previousDate && previousDate <= new Date(projectedEnd)) {
+    return previousNewer.createdAt;
+  }
+
+  return projectedEnd;
 }
 
 function applyAutomaticFilterDefaults(history) {
@@ -394,35 +444,36 @@ function renderProgressEvaluation(history) {
   progressEmptyEl.classList.add("hidden");
 }
 
-function renderHistory(history) {
-  if (!historyGridEl || !noHistoryEl) return;
-  if (history.length === 0) {
-    historyGridEl.innerHTML = "";
-    noHistoryEl.classList.remove("hidden");
-    return;
-  }
+function setDashboardViewState({ loading, content, unauthorized, error }) {
+  loadingEl?.classList.toggle("hidden", !loading);
+  contentEl?.classList.toggle("hidden", !content);
+  unauthorizedEl?.classList.toggle("hidden", !unauthorized);
+  dashboardErrorEl?.classList.toggle("hidden", !error);
+}
 
-  noHistoryEl.classList.add("hidden");
-  historyGridEl.innerHTML = history.map((entry, index) => {
-    const date = formatDate(entry.createdAt);
-    const endDate = getEntryEndDate(history, index);
-    const periodLabel = formatPeriodLabel(entry.createdAt, endDate);
-    const nome = entry.payload?.nome || "-";
-    const objetivo = entry.payload?.objetivo || "-";
-    const objetivoLabel = formatGoalLabel(objetivo);
-    const objetivoBadgeClass = getGoalBadgeClass(objetivo);
-    const dias = entry.payload?.diasSemana || "-";
-    const imc = formatImc(entry);
-    const preview = buildPlanPreview(entry.result);
-    const safeEntryId = escapeHtml(entry.id);
+function buildHistoryEntryCard(entry, history, index) {
+  const date = formatDate(entry.createdAt);
+  const periodicidade = getEntryPeriodicidade(entry);
+  const periodicidadeLabel = getCadenceLabel(periodicidade);
+  const endDate = getEntryEndDate(entry, history, index);
+  const periodLabel = formatPeriodLabel(entry.createdAt, endDate);
+  const nome = entry.payload?.nome || "-";
+  const objetivo = entry.payload?.objetivo || "-";
+  const objetivoLabel = formatGoalLabel(objetivo);
+  const objetivoBadgeClass = getGoalBadgeClass(objetivo);
+  const dias = entry.payload?.diasSemana || "-";
+  const imc = formatImc(entry);
+  const preview = buildPlanPreview(entry.result);
+  const safeEntryId = escapeHtml(entry.id);
 
-    return `
+  return `
       <article class="rounded-xl border border-white/20 bg-black/20 p-4">
         <div class="flex items-start justify-between gap-3">
           <p class="text-xs uppercase tracking-[0.2em] text-white/65">${escapeHtml(date)}</p>
           <span class="rounded-full border px-2 py-1 text-xs font-semibold ${objetivoBadgeClass}">${escapeHtml(objetivoLabel)}</span>
         </div>
-        <p class="mt-2 text-xs text-white/70">Período: <strong>${escapeHtml(periodLabel)}</strong></p>
+        <p class="mt-2 text-xs text-white/70">Periodicidade: <strong>${escapeHtml(periodicidadeLabel)}</strong></p>
+        <p class="mt-1 text-xs text-white/70">Período: <strong>${escapeHtml(periodLabel)}</strong></p>
         <p class="mt-2 text-sm font-semibold text-neonGreen">Cliente: ${escapeHtml(nome)}</p>
         <dl class="mt-3 grid gap-2 text-sm text-white/85">
           <div class="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
@@ -444,7 +495,18 @@ function renderHistory(history) {
         </button>
       </article>
     `;
-  }).join("");
+}
+
+function renderHistory(history) {
+  if (!historyGridEl || !noHistoryEl) return;
+  if (history.length === 0) {
+    historyGridEl.innerHTML = "";
+    noHistoryEl.classList.remove("hidden");
+    return;
+  }
+
+  noHistoryEl.classList.add("hidden");
+  historyGridEl.innerHTML = history.map((entry, index) => buildHistoryEntryCard(entry, history, index)).join("");
 
   historyGridEl.querySelectorAll("[data-entry-id]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -477,7 +539,6 @@ function applyFilters() {
   renderHistory(filtered);
 }
 
-applyFiltersEl?.addEventListener("click", applyFilters);
 clearFiltersEl?.addEventListener("click", () => {
   if (filterStartEl) filterStartEl.value = "";
   if (filterEndEl) filterEndEl.value = "";
@@ -490,10 +551,7 @@ filterEndEl?.addEventListener("change", applyFilters);
 filterGoalEl?.addEventListener("change", applyFilters);
 
 async function init() {
-  loadingEl?.classList.remove("hidden");
-  contentEl?.classList.add("hidden");
-  unauthorizedEl?.classList.add("hidden");
-  dashboardErrorEl?.classList.add("hidden");
+  setDashboardViewState({ loading: true, content: false, unauthorized: false, error: false });
 
   try {
     const data = await window.apiClient.getDashboard();
@@ -504,20 +562,17 @@ async function init() {
 
     allHistory = sourceHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    loadingEl?.classList.add("hidden");
-    contentEl?.classList.remove("hidden");
+    setDashboardViewState({ loading: false, content: true, unauthorized: false, error: false });
     applyAutomaticFilterDefaults(allHistory);
     applyFilters();
   } catch (error) {
     if (error && typeof error === "object" && "status" in error && error.status === 401) {
-      loadingEl?.classList.add("hidden");
-      unauthorizedEl?.classList.remove("hidden");
+      setDashboardViewState({ loading: false, content: false, unauthorized: true, error: false });
       return;
     }
 
     console.error(error);
-    loadingEl?.classList.add("hidden");
-    dashboardErrorEl?.classList.remove("hidden");
+    setDashboardViewState({ loading: false, content: false, unauthorized: false, error: true });
 
     if (dashboardErrorMessageEl) {
       dashboardErrorMessageEl.textContent = error instanceof Error && error.message

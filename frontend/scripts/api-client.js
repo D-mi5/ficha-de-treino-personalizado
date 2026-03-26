@@ -1,4 +1,30 @@
 (function initApiClient(globalScope) {
+  function buildJsonHeaders(customHeaders) {
+    return {
+      "Content-Type": "application/json",
+      ...(customHeaders || {}),
+    };
+  }
+
+  function createTimeoutController(timeoutMs) {
+    if (!(timeoutMs > 0)) {
+      return { controller: null, timeoutHandle: null };
+    }
+
+    const controller = new AbortController();
+    const timeoutHandle = setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+
+    return { controller, timeoutHandle };
+  }
+
+  function clearTimeoutController(timeoutHandle) {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+
   async function parseJsonResponse(response) {
     let data = null;
 
@@ -20,15 +46,26 @@
   }
 
   async function requestJson(url, options = {}) {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-    });
+    const { timeoutMs = 0, ...fetchOptions } = options;
+    const { controller, timeoutHandle } = createTimeoutController(timeoutMs);
 
-    return parseJsonResponse(response);
+    try {
+      const response = await fetch(url, {
+        ...fetchOptions,
+        headers: buildJsonHeaders(fetchOptions.headers),
+        signal: controller?.signal,
+      });
+
+      return parseJsonResponse(response);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw new Error("A solicitação demorou demais para responder. Tente novamente.");
+      }
+
+      throw error;
+    } finally {
+      clearTimeoutController(timeoutHandle);
+    }
   }
 
   const apiClient = {
@@ -58,6 +95,7 @@
       return requestJson("/api/generate-workout", {
         method: "POST",
         body: JSON.stringify(payload),
+        timeoutMs: 65000,
       });
     },
 

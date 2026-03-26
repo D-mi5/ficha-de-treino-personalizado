@@ -1,0 +1,263 @@
+DOCUMENTACAO TECNICA DO SISTEMA DE GERACAO DE FICHA DE TREINO PERSONALIZADA
+
+1. VISAO GERAL
+
+O sistema e uma aplicacao web full-stack para gerar fichas de treino femininas personalizadas com suporte de IA e validacoes clinicas.
+
+Problema que resolve:
+- Evita prescricoes genericas.
+- Considera variaveis fisiologicas e contexto clinico no momento da geracao.
+- Entrega retorno estruturado para exibicao em frontend com historico local/servidor.
+
+Publico-alvo:
+- Usuarias finais que desejam treino personalizado.
+- Time tecnico (devs e suporte) que precisa manter, evoluir e auditar o fluxo.
+
+Observacao tecnica importante:
+- No codigo atual, o frontend e HTML + JavaScript vanilla + Tailwind (nao React).
+
+
+2. ARQUITETURA
+
+Separacao frontend/backend:
+- Frontend: coleta dados, salva payload no localStorage, chama API, renderiza plano estruturado e sincroniza historico.
+- Backend: valida entrada, calcula analise de perfil, constroi prompt, consulta IA, valida contrato JSON e retorna resposta.
+
+Fluxo de dados:
+- Formulario -> localStorage(workoutPayload) -> pagina de resultado -> POST /api/generate-workout.
+- Backend responde com WorkoutResponse (workoutPlan estruturado + analysis).
+- Frontend renderiza tabela/blocos/cards e persiste historico.
+
+Integracao com IA:
+- Provedores suportados: OpenAI e Gemini (via endpoint compativel OpenAI).
+- Selecao de provider por configuracao e disponibilidade de chave.
+- Retry com ate 3 tentativas, timeout e fallback local estruturado em caso de falha.
+
+
+3. MODELAGEM DE DADOS
+
+3.1 Interface ClientProfile
+
+Campos:
+- nome: string opcional.
+  Finalidade: personalizacao textual da analise e da experiencia da usuaria.
+- idade: number.
+  Finalidade: regras de risco, intensidade e recuperacao.
+- peso: number.
+  Finalidade: calculo de IMC e ajuste clinico.
+- altura: number.
+  Finalidade: calculo de IMC.
+- objetivo: "emagrecimento" | "hipertrofia" | "definicao".
+  Finalidade: direcionar estrategia principal do plano.
+- nivel: "iniciante" | "intermediario" | "avancado".
+  Finalidade: modular volume, carga e complexidade do treino.
+- focoTreino: "nenhum" | "quadriceps" | "gluteo" | "posteriores" | "costas" | "peito" (opcional).
+  Finalidade: priorizar grupamento solicitado quando permitido.
+- diasSemana: number.
+  Finalidade: definir divisao semanal.
+- periodicidade: "semanal" | "quinzenal" | "mensal" (opcional).
+  Finalidade: orientar bloco de ciclo/progressao temporal.
+- observacoes: string opcional.
+  Finalidade: detectar risco articular/comorbidade por padrao textual.
+
+3.2 Interface ProfileAnalysis / WorkoutAnalysis
+
+Campos:
+- imc: number.
+  Finalidade: classificacao corporal e regras de risco.
+- classificacaoImc: string.
+  Finalidade: exibicao e contexto clinico.
+- intensidadeSugerida: "leve" | "moderada" | "intensa".
+  Finalidade: base para carga/progressao.
+- progressaoSemanal: string.
+  Finalidade: orientacao objetiva de evolucao.
+- contextoClinico: string.
+  Finalidade: consolidar restricoes e recomendacoes de seguranca.
+- mensagemAjuste: string | null.
+  Finalidade: explicar ajuste de objetivo quando houver conflito clinico.
+- objetivoFinal: Objetivo.
+  Finalidade: objetivo efetivo apos regras de seguranca.
+- diasTreinoAjustados: number.
+  Finalidade: limitar frequencia quando ha risco.
+- motivoAjusteDiasTreino: string | null.
+  Finalidade: justificativa do ajuste de frequencia.
+- nivelRisco: "baixo" | "moderado" | "alto".
+  Finalidade: modular prescricao, carga e cautela.
+- comentariosEssenciais: string[].
+  Finalidade: cards e orientacoes curtas de acompanhamento.
+
+3.3 Contrato de resposta principal
+
+WorkoutResponse:
+- workoutPlan: StructuredWorkoutPlan (ou string em historicos antigos).
+- analysis: WorkoutAnalysis.
+
+StructuredWorkoutPlan contem:
+- analise, ajusteObjetivo, estrategia, ciclo, treinos, distribuicaoSemanal, substituicoes, cards, observacoesFinais.
+
+
+4. LOGICA DE NEGOCIO
+
+4.1 Calculo de IMC
+- IMC calculado no backend com peso/altura.
+- Utilizado para classificacao e decisao de risco/objetivo/intensidade.
+
+4.2 Classificacao de IMC
+- O backend normaliza classificacao para exibicao amigavel (exemplo: "normal" -> "peso adequado").
+- Faixas de risco sao guiadas por regras clinicas centralizadas (clinical-rules).
+
+4.3 Definicao de intensidade
+- Prioridade para seguranca: idosa, comorbidade, risco articular e obesidade grave puxam intensidade para "leve".
+- Nivel de treino e faixa etaria ajustam teto de intensidade.
+- Em perfil avancado com baixa restricao, pode chegar a "intensa".
+
+4.4 Progressao semanal
+- Regra baseada em risco clinico e intensidade.
+- Em risco articular/comorbidade/idosa: progressao conservadora.
+- Em perfil de menor risco: progressao percentual semanal por intensidade.
+
+4.5 Decisao de objetivo (ajuste automatico)
+- Se IMC elevado com objetivo de hipertrofia/definicao: objetivo final pode ser ajustado para emagrecimento.
+- Se baixo peso com objetivo emagrecimento: objetivo final pode ser ajustado para hipertrofia.
+- Ajuste sempre gera justificativa tecnica em mensagemAjuste.
+
+
+5. SISTEMA DE PROMPT (CORE DO PROJETO)
+
+5.1 Estrutura do basePrompt
+- Prompt extenso com regras de seguranca, nivel, idade, periodicidade, divisao semanal e formato de saida.
+- Define comportamento de especialista e proibe respostas genericas.
+
+5.2 Regras obrigatorias
+- Respeitar contexto clinico e intensidade sugerida.
+- Incluir secoes obrigatorias de analise, ajuste, estrategia, ciclo, ficha, distribuicao, substituicoes, dicas, cards e fechamento.
+- Exigir formato de linha de exercicio para parse no frontend.
+
+5.3 Contrato JSON
+- A IA deve retornar apenas JSON valido com campos obrigatorios:
+  analise, ajusteObjetivo, estrategia, ciclo, treinos, distribuicaoSemanal, substituicoes, cards, observacoesFinais.
+
+5.4 Validacoes
+- Parse com recuperacao basica (remoção de BOM e virgula final).
+- Validacao estrutural com Zod (workoutResponseSchema/workoutPlanSchema).
+- Erros de parse/schema geram instrucao de compliance para nova tentativa.
+
+5.5 Como a IA e guiada
+- Prompt inclui dados da cliente + analise previa do sistema + instrucao final.
+- Se resposta vier fora do contrato, backend envia instrucoes de correcao e reexecuta tentativa.
+- Se persistir falha, sistema retorna fallback local estruturado.
+
+
+6. PERSONALIZACAO DO TREINO
+
+6.1 Divisao semanal
+- Divisao definida por dias ajustados e perfil.
+- Estrutura muda entre 2 a 5 dias com blocos A/B/C/D/E.
+
+6.2 Escolha de exercicios
+- Biblioteca local de exercicios por grupamento (quadriceps, gluteo, posteriores, costas, peito, ombros, core, panturrilhas, cardio).
+- Dedupe de exercicios e limite de volume por bloco.
+
+6.3 Adaptacao por nivel
+- Iniciante: volume/carga mais conservadores.
+- Intermediario: progressao moderada.
+- Avancado: possibilidade de maior carga quando clinicamente permitido.
+
+6.4 Adaptacao por dor
+- Observacoes textuais sao analisadas por padroes de risco articular.
+- Em risco, prioriza execucao controlada e substituicoes seguras.
+
+6.5 Foco muscular
+- Foco valido para intermediario/avancado.
+- Backend prioriza grupamento no template dos treinos.
+- Frontend tambem restringe foco para iniciantes.
+
+
+7. TRATAMENTO DE RISCO
+
+Como o sistema evita lesoes:
+- Camada de validacao de entrada (Zod).
+- Camada de analise clinica (idade, IMC, observacoes, nivel).
+- Camada de controle da IA (prompt restritivo + validacao de schema).
+- Fallback local seguro quando IA falha.
+
+Regras para dor (coluna, joelho, ombro e correlatas):
+- Deteccao por padroes em observacoes (ex.: coluna, lombar, joelho, tendinite, bursite, lesao).
+- Intensidade reduzida para perfil com risco articular.
+- Ajuste de frequencia para melhorar recuperacao.
+- Recomendacao de evitar impacto e priorizar execucao controlada.
+
+Ajustes automaticos relevantes:
+- Reducao de dias de treino em perfis de risco alto.
+- Ajuste de objetivo em conflitos clinicos.
+- Comentarios essenciais para reforco de seguranca e recuperacao.
+
+
+8. FLUXO COMPLETO DO SISTEMA
+
+9. Usuario preenche formulario
+- Frontend valida campos basicos e monta payload.
+- Payload salvo em localStorage e redireciona para /resultado.
+
+10. Backend processa dados
+- Rota /api/generate-workout aplica rate limit e auditoria.
+- Payload validado por profileSchema.
+
+11. Calcula analise
+- Backend executa analyzeProfile e gera ProfileAnalysis/WorkoutAnalysis.
+
+12. Monta prompt
+- buildWorkoutPrompt combina basePrompt + dados da cliente + analise previa.
+
+13. Envia para IA
+- generateWorkout escolhe provider/modelo e envia chat completion com timeout.
+
+14. Recebe JSON
+- Resposta passa por parse robusto e validacao Zod.
+- Se invalida, sistema reorienta IA com instrucao de compliance e tenta novamente.
+
+15. Retorna para frontend
+- Em sucesso: retorna JSON estruturado.
+- Em falha recorrente: retorna fallback local estruturado.
+- Frontend renderiza cards/tabelas e persiste historico.
+
+
+9. BOAS PRATICAS
+
+- Validacao de dados em todas as fronteiras (frontend e backend).
+- Contrato de resposta estrito para evitar quebra de renderizacao.
+- Retry com criterio para erros transientes e nao conformidade de schema.
+- Fallback local para resiliencia sem interromper fluxo da usuaria.
+- Mensagens de erro diferenciadas por timeout/instabilidade/erro interno.
+- Historico com deduplicacao por assinatura de plano.
+
+
+10. POSSIVEIS MELHORIAS
+
+- Evolucao automatica por ciclo:
+  aplicar ajuste incremental da prescricao usando historico recente e aderencia.
+
+- Historico de treino mais rico:
+  armazenar metadados de concluido/nao concluido por sessao para feedback de progressao.
+
+- Integracao nutricional:
+  adicionar modulo complementar de recomendacao nutricional e checkpoints.
+
+- Exportacao PDF:
+  gerar ficha final em formato imprimivel com layout padronizado e assinatura de versao.
+
+
+ANEXO TECNICO (RESUMO DE VALIDACOES CHAVE)
+
+- profileSchema:
+  valida idade, peso, altura, objetivo, nivel, foco, dias, periodicidade e observacoes.
+  Regra extra: iniciantes nao podem usar focoTreino diferente de "nenhum".
+
+- workoutPlanSchema:
+  exige estrutura completa do plano (blocos, exercicios, cards e observacoes finais).
+
+- workoutResponseSchema:
+  exige workoutPlan estruturado + analysis completo.
+
+- historySyncSchema:
+  aceita compatibilidade com entradas antigas (string ou plano estruturado) para nao quebrar sincronizacao.
