@@ -1,5 +1,6 @@
 # Gerador de Ficha de Treino Feminino
 
+<video src="frontend/assets/images/preview.gif.mp4" controls width="900"></video>
 [![CI](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml/badge.svg)](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/coverage-vitest%20v8-blue)
 
