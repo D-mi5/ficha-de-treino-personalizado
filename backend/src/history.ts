@@ -28,6 +28,38 @@ const historyStore = new Map<string, ClientHistory>();
 
 const HISTORY_LIMIT = 10;
 
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+function trimHistoryLimit(entries: WorkoutHistoryEntry[]): WorkoutHistoryEntry[] {
+  return entries.slice(0, HISTORY_LIMIT);
+}
+
+function persistClientHistory(history: ClientHistory): void {
+  history.lastSync = nowIso();
+  historyStore.set(history.clientId, history);
+}
+
+function mergeHistoryById(
+  serverEntries: WorkoutHistoryEntry[],
+  localEntries: HistoryMergeEntry[],
+): HistoryMergeEntry[] {
+  const merged = new Map<string, HistoryMergeEntry>();
+
+  serverEntries.forEach((entry) => {
+    merged.set(entry.id, entry);
+  });
+
+  localEntries.forEach((entry) => {
+    if (!merged.has(entry.id)) {
+      merged.set(entry.id, entry);
+    }
+  });
+
+  return Array.from(merged.values());
+}
+
 function getWorkoutPlanSignature(workoutPlan: unknown): string {
   if (typeof workoutPlan === "string") {
     return workoutPlan.trim();
@@ -76,7 +108,7 @@ export function getClientHistory(clientId: string): ClientHistory {
     historyStore.set(clientId, {
       clientId,
       entries: [],
-      lastSync: new Date().toISOString(),
+      lastSync: nowIso(),
     });
   }
 
@@ -92,7 +124,7 @@ export function addWorkoutToHistory(
 
   const newEntry: WorkoutHistoryEntry = {
     id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
+    createdAt: nowIso(),
     payload,
     result,
   };
@@ -104,13 +136,8 @@ export function addWorkoutToHistory(
   // Adicionar novo entry no começo
   history.entries.unshift(newEntry);
 
-  // Limitar ao histórico máximo
-  if (history.entries.length > HISTORY_LIMIT) {
-    history.entries = history.entries.slice(0, HISTORY_LIMIT);
-  }
-
-  history.lastSync = new Date().toISOString();
-  historyStore.set(clientId, history);
+  history.entries = trimHistoryLimit(history.entries);
+  persistClientHistory(history);
 
   return newEntry;
 }
@@ -120,24 +147,10 @@ export function syncClientHistory(
   localEntries: HistoryMergeEntry[],
 ): ClientHistory {
   const serverHistory = getClientHistory(clientId);
-
-  // Mesclar históricos: manter entries únicas por ID
-  const merged = new Map<string, HistoryMergeEntry>();
-
-  // Adicionar histórico do servidor
-  serverHistory.entries.forEach((entry) => {
-    merged.set(entry.id, entry);
-  });
-
-  // Adicionar histórico do cliente (sobrescreve se ID existir)
-  localEntries.forEach((entry) => {
-    if (!merged.has(entry.id)) {
-      merged.set(entry.id, entry);
-    }
-  });
+  const mergedEntries = mergeHistoryById(serverHistory.entries, localEntries);
 
   // Converter de volta para array, ordenar por data e limitar
-  const allEntries = Array.from(merged.values()).sort(
+  const allEntries = mergedEntries.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
@@ -145,8 +158,7 @@ export function syncClientHistory(
     .map((entry) => normalizeHistoryEntry(entry))
     .filter((entry): entry is WorkoutHistoryEntry => Boolean(entry))
     .slice(0, HISTORY_LIMIT);
-  serverHistory.lastSync = new Date().toISOString();
-  historyStore.set(clientId, serverHistory);
+  persistClientHistory(serverHistory);
 
   return serverHistory;
 }

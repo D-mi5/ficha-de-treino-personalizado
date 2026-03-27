@@ -27,15 +27,17 @@
           </button>
         </div>
 
-        <form id="signup-form" class="space-y-4" novalidate>
+        <form id="signup-form" class="space-y-4" novalidate autocomplete="off">
+          <input type="text" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" class="sr-only" />
+          <input type="password" name="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" class="sr-only" />
           <label class="space-y-2">
             <span class="text-sm">E-mail</span>
-            <input id="signup-email" class="input-field" type="email" placeholder="seu@email.com" required />
+            <input id="signup-email" name="signup-email" class="input-field" type="email" placeholder="seu@email.com" required autocomplete="off" autocapitalize="none" spellcheck="false" />
           </label>
           <label class="space-y-2">
             <span class="text-sm">Senha (mín. 6 caracteres)</span>
             <div class="password-field-wrap">
-              <input id="signup-password" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required />
+              <input id="signup-password" name="signup-new-password" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required autocomplete="new-password" />
               <button id="signup-password-toggle" class="password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false">
                 <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
@@ -60,7 +62,7 @@
           <label class="space-y-2">
             <span class="text-sm">Confirmar Senha</span>
             <div class="password-field-wrap">
-              <input id="signup-password-confirm" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required />
+              <input id="signup-password-confirm" name="signup-confirm-password" class="input-field pr-11" type="password" placeholder="••••••••" minlength="6" required autocomplete="new-password" />
               <button id="signup-password-confirm-toggle" class="password-toggle" type="button" aria-label="Mostrar confirmação de senha" aria-pressed="false">
                 <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
@@ -80,15 +82,15 @@
           <p id="signup-error" class="status-inline hidden" role="alert" aria-live="assertive"></p>
         </form>
 
-        <form id="login-form" class="hidden space-y-4" novalidate>
+        <form id="login-form" class="hidden space-y-4" novalidate autocomplete="on">
           <label class="space-y-2">
             <span class="text-sm">E-mail</span>
-            <input id="login-email" class="input-field" type="email" placeholder="seu@email.com" required />
+            <input id="login-email" name="email" class="input-field" type="email" placeholder="seu@email.com" required autocomplete="email" autocapitalize="none" spellcheck="false" />
           </label>
           <label class="space-y-2">
             <span class="text-sm">Senha</span>
             <div class="password-field-wrap">
-              <input id="login-password" class="input-field pr-11" type="password" placeholder="••••••••" required />
+              <input id="login-password" name="login-password" class="input-field pr-11" type="password" placeholder="••••••••" required autocomplete="off" />
               <button id="login-password-toggle" class="password-toggle" type="button" aria-label="Mostrar senha de login" aria-pressed="false">
                 <svg class="password-toggle-icon icon-eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />

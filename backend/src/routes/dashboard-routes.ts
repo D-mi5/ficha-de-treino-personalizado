@@ -5,10 +5,12 @@ import { CLINICAL_RULES } from "../clinical-rules.js";
 import { getClientHistory, syncClientHistory } from "../history.js";
 import { logger } from "../logger.js";
 
+const DASHBOARD_ROUTE = "/api/dashboard";
+
 export function registerDashboardRoutes(app: Express): void {
-  app.get("/api/dashboard", authMiddleware, createAuditMiddleware("dashboard_access"), (req, res) => {
+  app.get(DASHBOARD_ROUTE, authMiddleware, createAuditMiddleware("dashboard_access"), (req, res) => {
     if (!req.userId) {
-      logger.warn("dashboard_unauthorized", { route: "/api/dashboard", requestId: req.requestId });
+      logger.warn("dashboard_unauthorized", { route: DASHBOARD_ROUTE, requestId: req.requestId });
       return res.status(401).json({ error: "Não autenticado" });
     }
 
@@ -18,7 +20,7 @@ export function registerDashboardRoutes(app: Express): void {
       if (anonymousHistory.entries.length > 0) {
         syncClientHistory(req.userId, anonymousHistory.entries);
         logger.info("dashboard_history_merged", {
-          route: "/api/dashboard",
+          route: DASHBOARD_ROUTE,
           requestId: req.requestId,
           fromClientId: clientId,
           toUserId: req.userId,
@@ -29,7 +31,7 @@ export function registerDashboardRoutes(app: Express): void {
 
     const history = getClientHistory(req.userId);
     logger.info("dashboard_fetched", {
-      route: "/api/dashboard",
+      route: DASHBOARD_ROUTE,
       requestId: req.requestId,
       userId: req.userId,
       entries: history.entries.length,

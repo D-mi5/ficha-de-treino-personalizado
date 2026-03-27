@@ -8,6 +8,6 @@ export const CLINICAL_RULES = {
   imcObesidadeGrave: 35,
   imcRiscoMaximo: 40,
   imcDesnutricao: 18.5,
-  riscoArticularPattern: "joelho|quadril|coluna|lombar|articul|hernia|dor\\s*cronica|tendinit|bursit|lesa",
+  riscoArticularPattern: "joelho|patelo|menisc|ligament|condromalac|quadril|coluna|lombar|cervical|ombro|manguito|ciatic|escolios|discopat|protus|articul|hernia|dor\\s*cronica|tendinit|bursit|lesa",
   comorbidadePattern: "hiperten|diabet|insulin|cardi|asma|dpo|tireo|fibromial|lupus|artrite|artrose",
 } as const;

@@ -1,5 +1,8 @@
 # Gerador de Ficha de Treino Feminino
 
+Versao da documentacao: 1.1.0  
+Ultima atualizacao: 2026-03-27
+
 [![CI](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml/badge.svg)](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/coverage-vitest%20v8-blue)
 
@@ -234,6 +237,32 @@ Campos principais:
 - Adaptacao por dor/comorbidade detectada em observacoes via padrao textual.
 - Divisao semanal e selecao de exercicios orientadas por objetivo, nivel, foco e risco.
 
+## Regras de Tecnicas Avancadas (Resumo)
+
+Regras ativas no sistema:
+- Tecnicas avancadas so entram quando `focoTreino` esta preenchido.
+- Grupos validos para tecnicas: `quadriceps`, `posteriores`, `gluteo`, `costas`, `peito`.
+- Sem foco (`nenhum`), a ficha sai sem tecnicas avancadas.
+- Tecnicas sao aplicadas no treino de enfase (primeiro treino da semana que contem o grupo foco).
+- Tecnicas sao aplicadas apenas nos exercicios do grupamento foco.
+
+Comportamento por nivel:
+- Intermediario com foco: `bi-set` + `tri-set` no treino de enfase.
+- Avancado com foco e intensidade intensa: `bi-set` + `tri-set` + `rest-pause` no treino de enfase.
+- Perfil de risco alto: tecnicas avancadas bloqueadas.
+
+## Ficha Autoexplicativa para Cliente
+
+Para reduzir duvidas de execucao, a ficha descreve a tecnica na propria linha do exercicio:
+- `bi-set`: mostra o par de exercicios do bloco.
+- `tri-set`: mostra os 3 exercicios do bloco e a ordem.
+- `rest-pause` e `drop-set`: mostra instrucao curta de pausa/reducao de carga.
+
+Exemplo:
+- `Leg press (tri-set: Cadeira extensora + Leg press + Hack machine, em sequencia sem descanso; descansar 60-90s ao final)`
+
+No frontend, quando essa explicacao ja esta no nome do exercicio, o selo visual de tecnica avancada nao e duplicado.
+
 ## Sistema de IA (Core)
 
 O core da IA combina 4 camadas:
@@ -258,6 +287,16 @@ O core da IA combina 4 camadas:
 ### 1) Requisitos
 - Node.js 20+
 - npm 10+
+
+## Matriz de Compatibilidade (Ambiente)
+
+| Componente | Versao recomendada | Status |
+|---|---|---|
+| Node.js | 20.x ou superior | Obrigatorio |
+| npm | 10.x ou superior | Obrigatorio |
+| Sistema Operacional | Windows 10/11, Linux, macOS | Suportado |
+| Navegadores (frontend) | Chrome, Edge, Firefox (ultimas versoes) | Recomendado |
+| Provider IA | OpenAI ou Gemini | Configuravel |
 
 ### 2) Instalar dependencias
 
@@ -326,7 +365,92 @@ E2E:
 npm run test:e2e
 ```
 
+## Troubleshooting Rapido
+
+### 1) Erro 503 ao gerar ficha
+Possiveis causas:
+- chave de IA ausente/invalida;
+- indisponibilidade do provider;
+- timeout em cascata.
+
+Acoes:
+1. Verifique `AI_PROVIDER`, `OPENAI_API_KEY` e/ou `GEMINI_API_KEY`.
+2. Confirme `GET /api/health`.
+3. Observe `X-Generation-Source` e `generationMeta` para identificar fallback local.
+
+### 2) Erro 429 (rate limit)
+Possiveis causas:
+- excesso de tentativas em rotas sensiveis.
+
+Acoes:
+1. Aguarde janela de reset do limite.
+2. Em producao, ajustar limites e UX conforme volume real.
+
+### 3) Ficha sem tecnicas avancadas
+Possiveis causas:
+- `focoTreino=nenhum`;
+- perfil de risco alto;
+- nivel iniciante.
+
+Acoes:
+1. Validar payload enviado no formulario.
+2. Verificar `analysis.nivelRisco` e `profile.nivel`.
+3. Executar comandos de QA rapido desta documentacao.
+
+### 4) Tecnica repetida na tela (nome + selo)
+Possiveis causas:
+- regressao de renderizacao no frontend.
+
+Acoes:
+1. Validar logica de render em `frontend/scripts/result.js`.
+2. Confirmar que nomes com instrucao tecnica suprimem o selo duplicado.
+
+### 5) Login/cadastro inconsistente em desenvolvimento
+Possiveis causas:
+- reinicio de servidor sem persistencia ativa;
+- configuracao de cookie em ambiente local.
+
+Acoes:
+1. Validar fluxo de auth e cookie `sessionToken`.
+2. Conferir logs de `auth_register` e `auth_login` com `X-Request-Id`.
+
+## Como Testar em 30 Segundos (QA Rapido)
+
+1) Sem foco: nao deve existir tecnica avancada.
+
+```bash
+npx tsx --env-file=.env --eval "import { analyzeProfile } from './backend/src/metrics.ts'; import { buildLocalWorkoutFallback } from './backend/src/local-workout-plan.ts'; const p={nome:'QA',idade:35,peso:70,altura:1.66,objetivo:'definicao',nivel:'intermediario',focoTreino:'nenhum',diasSemana:4,periodicidade:'mensal',observacoes:''}; const a=analyzeProfile(p as any); const out=buildLocalWorkoutFallback(p as any,a); const tecs=out.workoutPlan.treinos.flatMap((t:any)=>t.exercicios.filter((e:any)=>e.tecnicaAvancada)); console.log('tecnicas:', tecs.length);"
+```
+
+Resultado esperado:
+- `tecnicas: 0`
+
+2) Com foco: tecnicas somente no treino de enfase e no grupo foco, com tri-set descritivo.
+
+```bash
+npx tsx --env-file=.env --eval "import { analyzeProfile } from './backend/src/metrics.ts'; import { buildLocalWorkoutFallback } from './backend/src/local-workout-plan.ts'; const p={nome:'QA',idade:31,peso:63,altura:1.66,objetivo:'hipertrofia',nivel:'avancado',focoTreino:'quadriceps',diasSemana:4,periodicidade:'mensal',observacoes:''}; const a=analyzeProfile(p as any); const out=buildLocalWorkoutFallback(p as any,a); out.workoutPlan.treinos.forEach((t:any)=>{ const tecs=t.exercicios.filter((e:any)=>e.tecnicaAvancada).map((e:any)=>({nome:e.nome,grupo:e.grupoMuscular,tec:e.tecnicaAvancada})); if (tecs.length) console.log(t.dia, t.nome, tecs); });"
+```
+
+Resultado esperado:
+- tecnicas apenas no treino de enfase;
+- tecnicas apenas em exercicios do grupamento foco;
+- `tri-set` com os 3 exercicios descritos no nome do exercicio.
+
 ## Observabilidade e Seguranca
+
+## SLOs Operacionais (Referencia)
+
+| Indicador | Meta alvo | Janela |
+|---|---|---|
+| Disponibilidade da API (`/api/health`) | >= 99.5% | mensal |
+| Sucesso em `POST /api/generate-workout` | >= 97% | mensal |
+| P95 de latencia em geracao de ficha | <= 8s | semanal |
+| Taxa de `fallback-local` | <= 15% | semanal |
+| Taxa de erro 5xx em geracao | <= 2% | semanal |
+
+Observacoes:
+- Em incidentes de provider IA, a taxa de fallback pode subir temporariamente sem comprometer disponibilidade funcional.
+- Ajustar metas por estagio do produto e volume real de usuarios.
 
 - `X-Request-Id` em todas as respostas.
 - Logs JSON estruturados com mascara de campos sensiveis.

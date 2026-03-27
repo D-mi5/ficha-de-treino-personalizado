@@ -1,47 +1,58 @@
-import { Express } from "express";
+import { Express, Request, Response } from "express";
 import { createAuditMiddleware } from "../audit.js";
 import { authenticateUser, logoutSession, registerUser } from "../auth.js";
+import { BASE_COOKIE_SECURITY_OPTIONS, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "../http-constants.js";
 import { logger } from "../logger.js";
 import { loginRateLimiter, registerRateLimiter } from "../rate-limiters.js";
 import { authSchema } from "../schemas.js";
 
-const SESSION_COOKIE_NAME = "sessionToken";
-const SESSION_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-const SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
-  maxAge: SESSION_COOKIE_MAX_AGE_MS,
-};
+const AUTH_REGISTER_ROUTE = "/api/auth/register";
+const AUTH_LOGIN_ROUTE = "/api/auth/login";
+const AUTH_LOGOUT_ROUTE = "/api/auth/logout";
+const SESSION_CLEAR_COOKIE_OPTIONS = BASE_COOKIE_SECURITY_OPTIONS;
 
-const SESSION_CLEAR_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
-};
+interface AuthPayload {
+  email: string;
+  password: string;
+}
+
+function parseAuthPayload(
+  req: Request,
+  res: Response,
+  route: string,
+  validationEvent: string,
+): AuthPayload | null {
+  const parsed = authSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    logger.warn(validationEvent, {
+      route,
+      requestId: req.requestId,
+    });
+
+    res.status(400).json({
+      error: "E-mail e senha são obrigatórios",
+      issues: parsed.error.flatten(),
+    });
+    return null;
+  }
+
+  return parsed.data;
+}
 
 export function registerAuthRoutes(app: Express): void {
-  app.post("/api/auth/register", registerRateLimiter, createAuditMiddleware("auth_register"), (req, res) => {
-    const parsed = authSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      logger.warn("auth_register_validation_failed", {
-        route: "/api/auth/register",
-        requestId: req.requestId,
-      });
-
-      return res.status(400).json({
-        error: "E-mail e senha são obrigatórios",
-        issues: parsed.error.flatten(),
-      });
+  app.post(AUTH_REGISTER_ROUTE, registerRateLimiter, createAuditMiddleware("auth_register"), (req, res) => {
+    const payload = parseAuthPayload(req, res, AUTH_REGISTER_ROUTE, "auth_register_validation_failed");
+    if (!payload) {
+      return;
     }
 
-    const { email, password } = parsed.data;
+    const { email, password } = payload;
     const user = registerUser(email, password);
 
     if (!user) {
       logger.warn("auth_register_conflict", {
-        route: "/api/auth/register",
+        route: AUTH_REGISTER_ROUTE,
         requestId: req.requestId,
         email,
       });
@@ -53,7 +64,7 @@ export function registerAuthRoutes(app: Express): void {
 
     if (!session) {
       logger.error("auth_register_session_creation_failed", {
-        route: "/api/auth/register",
+        route: AUTH_REGISTER_ROUTE,
         requestId: req.requestId,
         email,
       });
@@ -64,7 +75,7 @@ export function registerAuthRoutes(app: Express): void {
     res.cookie(SESSION_COOKIE_NAME, session.token, SESSION_COOKIE_OPTIONS);
 
     logger.info("auth_register_success", {
-      route: "/api/auth/register",
+      route: AUTH_REGISTER_ROUTE,
       requestId: req.requestId,
       email,
       userId: user.id,
@@ -73,27 +84,18 @@ export function registerAuthRoutes(app: Express): void {
     return res.json({ email: user.email, userId: user.id });
   });
 
-  app.post("/api/auth/login", loginRateLimiter, createAuditMiddleware("auth_login"), (req, res) => {
-    const parsed = authSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      logger.warn("auth_login_validation_failed", {
-        route: "/api/auth/login",
-        requestId: req.requestId,
-      });
-
-      return res.status(400).json({
-        error: "E-mail e senha são obrigatórios",
-        issues: parsed.error.flatten(),
-      });
+  app.post(AUTH_LOGIN_ROUTE, loginRateLimiter, createAuditMiddleware("auth_login"), (req, res) => {
+    const payload = parseAuthPayload(req, res, AUTH_LOGIN_ROUTE, "auth_login_validation_failed");
+    if (!payload) {
+      return;
     }
 
-    const { email, password } = parsed.data;
+    const { email, password } = payload;
     const session = authenticateUser(email, password);
 
     if (!session) {
       logger.warn("auth_login_failed", {
-        route: "/api/auth/login",
+        route: AUTH_LOGIN_ROUTE,
         requestId: req.requestId,
         email,
       });
@@ -104,7 +106,7 @@ export function registerAuthRoutes(app: Express): void {
     res.cookie(SESSION_COOKIE_NAME, session.token, SESSION_COOKIE_OPTIONS);
 
     logger.info("auth_login_success", {
-      route: "/api/auth/login",
+      route: AUTH_LOGIN_ROUTE,
       requestId: req.requestId,
       email,
       userId: session.userId,
@@ -113,7 +115,7 @@ export function registerAuthRoutes(app: Express): void {
     return res.json({ email, userId: session.userId });
   });
 
-  app.post("/api/auth/logout", createAuditMiddleware("auth_logout"), (req, res) => {
+  app.post(AUTH_LOGOUT_ROUTE, createAuditMiddleware("auth_logout"), (req, res) => {
     const sessionToken = req.cookies?.[SESSION_COOKIE_NAME];
     if (sessionToken) {
       logoutSession(sessionToken);
@@ -121,7 +123,7 @@ export function registerAuthRoutes(app: Express): void {
 
     res.clearCookie(SESSION_COOKIE_NAME, SESSION_CLEAR_COOKIE_OPTIONS);
     logger.info("auth_logout", {
-      route: "/api/auth/logout",
+      route: AUTH_LOGOUT_ROUTE,
       requestId: req.requestId,
       hasSessionToken: Boolean(sessionToken),
     });

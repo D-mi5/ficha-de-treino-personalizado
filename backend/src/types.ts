@@ -4,6 +4,9 @@ export type Intensidade = "leve" | "moderada" | "intensa";
 export type FocoTreino = "nenhum" | "quadriceps" | "gluteo" | "posteriores" | "costas" | "peito";
 export type PeriodicidadeFicha = "semanal" | "quinzenal" | "mensal";
 export type NivelRisco = "baixo" | "moderado" | "alto";
+export type TecnicaAvancada = "superserie" | "bi-set" | "tri-set" | "rest-pause" | "drop-set" | "piramide" | "serie combinada";
+export type GenerationSource = "ai" | "fallback-local";
+export type GenerationFallbackReason = "provider-unavailable" | "timeout" | "invalid-output" | "missing-credentials" | "unknown";
 
 export interface WorkoutExercise {
   nome: string;
@@ -11,6 +14,7 @@ export interface WorkoutExercise {
   repeticoes: string;
   carga: "leve" | "moderada" | "alta";
   grupoMuscular: string;
+  tecnicaAvancada?: TecnicaAvancada;
 }
 
 export interface WorkoutBlock {
@@ -66,4 +70,11 @@ export interface WorkoutAnalysis {
 export interface WorkoutResponse {
   workoutPlan: string | StructuredWorkoutPlan;
   analysis: WorkoutAnalysis;
+  generationMeta?: {
+    source: GenerationSource;
+    provider?: "openai" | "gemini";
+    model?: string;
+    attempts?: number;
+    fallbackReason?: GenerationFallbackReason;
+  };
 }

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { validateSession } from "./auth.js";
+import { BASE_COOKIE_SECURITY_OPTIONS, SESSION_COOKIE_NAME } from "./http-constants.js";
 
 declare global {
   namespace Express {
@@ -9,15 +10,10 @@ declare global {
   }
 }
 
-const AUTH_COOKIE_NAME = "sessionToken";
-const AUTH_CLEAR_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
-};
+const AUTH_CLEAR_COOKIE_OPTIONS = BASE_COOKIE_SECURITY_OPTIONS;
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const token = req.cookies?.[AUTH_COOKIE_NAME];
+  const token = req.cookies?.[SESSION_COOKIE_NAME];
 
   if (!token) {
     return next();
@@ -26,7 +22,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const userId = validateSession(token);
 
   if (!userId) {
-    res.clearCookie(AUTH_COOKIE_NAME, AUTH_CLEAR_COOKIE_OPTIONS);
+    res.clearCookie(SESSION_COOKIE_NAME, AUTH_CLEAR_COOKIE_OPTIONS);
     return next();
   }
 

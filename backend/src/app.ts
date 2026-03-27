@@ -14,6 +14,12 @@ import { registerWorkoutRoutes } from "./routes/workout-routes.js";
 
 const API_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const API_RATE_LIMIT_MAX_REQUESTS = 120;
+const DEVELOPMENT_CORS_ORIGINS = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
 
 function getAllowedCorsOrigins(): string[] {
   const configuredOrigins = (process.env.CORS_ORIGIN || "")
@@ -26,7 +32,7 @@ function getAllowedCorsOrigins(): string[] {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"];
+    return DEVELOPMENT_CORS_ORIGINS;
   }
 
   return [];

@@ -5,6 +5,18 @@ const focoTreinoSelect = document.getElementById("foco-treino-select");
 const submitWorkoutBtn = document.getElementById("submit-workout");
 const formFeedbackEl = document.getElementById("form-feedback");
 
+const SUBMIT_LABEL_IDLE = "Gerar minha ficha agora";
+const SUBMIT_LABEL_LOADING = "Preparando sua ficha...";
+const NOME_MIN_LENGTH = 2;
+const IDADE_MIN = 14;
+const IDADE_MAX = 85;
+const PESO_MIN = 35;
+const PESO_MAX = 250;
+const ALTURA_MIN = 1.3;
+const ALTURA_MAX = 2.2;
+const DIAS_SEMANA_MIN = 2;
+const DIAS_SEMANA_MAX = 6;
+
 function showFormFeedback(message) {
   if (!formFeedbackEl) {
     return;
@@ -32,7 +44,7 @@ function setSubmitLoading(isLoading) {
 
   submitWorkoutBtn.disabled = isLoading;
   submitWorkoutBtn.classList.toggle("is-loading", isLoading);
-  submitWorkoutBtn.textContent = isLoading ? "Preparando sua ficha..." : "Gerar minha ficha agora";
+  submitWorkoutBtn.textContent = isLoading ? SUBMIT_LABEL_LOADING : SUBMIT_LABEL_IDLE;
 }
 
 function formatAlturaValue(rawValue) {
@@ -77,24 +89,28 @@ function shouldShowFocoTreino(nivel) {
   return nivel === "intermediario" || nivel === "avancado";
 }
 
+function parseNumberFormField(formData, fieldName) {
+  return Number(formData.get(fieldName));
+}
+
 function validatePayloadInput({ nome, idade, peso, altura, diasSemana }) {
-  if (nome.length < 2) {
+  if (nome.length < NOME_MIN_LENGTH) {
     return "Informe o nome da cliente com pelo menos 2 caracteres.";
   }
 
-  if (!Number.isFinite(idade) || idade < 14 || idade > 85) {
+  if (!Number.isFinite(idade) || idade < IDADE_MIN || idade > IDADE_MAX) {
     return "Informe uma idade válida entre 14 e 85 anos.";
   }
 
-  if (!Number.isFinite(peso) || peso < 35 || peso > 250) {
+  if (!Number.isFinite(peso) || peso < PESO_MIN || peso > PESO_MAX) {
     return "Informe um peso válido entre 35kg e 250kg.";
   }
 
-  if (!Number.isFinite(altura) || altura < 1.3 || altura > 2.2) {
+  if (!Number.isFinite(altura) || altura < ALTURA_MIN || altura > ALTURA_MAX) {
     return "Informe a altura no formato 1.74 (entre 1.30 e 2.20).";
   }
 
-  if (!Number.isFinite(diasSemana) || diasSemana < 2 || diasSemana > 6) {
+  if (!Number.isFinite(diasSemana) || diasSemana < DIAS_SEMANA_MIN || diasSemana > DIAS_SEMANA_MAX) {
     return "Selecione uma frequência semanal entre 2 e 6 dias.";
   }
 
@@ -109,9 +125,9 @@ function buildPayloadFromForm(formData) {
   const periodicidade = String(formData.get("periodicidade") || "semanal");
   const rawAltura = String(formData.get("altura") || "");
   const altura = Number(rawAltura.replace(",", "."));
-  const idade = Number(formData.get("idade"));
-  const peso = Number(formData.get("peso"));
-  const diasSemana = Number(formData.get("diasSemana"));
+  const idade = parseNumberFormField(formData, "idade");
+  const peso = parseNumberFormField(formData, "peso");
+  const diasSemana = parseNumberFormField(formData, "diasSemana");
 
   const validationMessage = validatePayloadInput({ nome, idade, peso, altura, diasSemana });
   if (validationMessage) {

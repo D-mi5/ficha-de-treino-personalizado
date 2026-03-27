@@ -7,6 +7,13 @@ const { mockGenerateWorkout } = vi.hoisted(() => ({
 
 vi.mock("../agents.js", () => ({
   generateWorkout: mockGenerateWorkout,
+  getGenerationReadiness: () => ({
+    configured: false,
+    providerPreference: "auto",
+    availableProviders: ["openai"],
+    hasOpenAiKey: false,
+    hasGeminiKey: false,
+  }),
 }));
 
 import { createApp } from "../app.js";
@@ -33,6 +40,16 @@ const validResult = {
   },
 };
 
+const validResultWithMeta = {
+  ...validResult,
+  generationMeta: {
+    source: "ai",
+    provider: "openai",
+    model: "gpt-4o-mini",
+    attempts: 1,
+  },
+};
+
 describe("Workout and auth routes", () => {
   beforeEach(() => {
     mockGenerateWorkout.mockReset();
@@ -45,6 +62,10 @@ describe("Workout and auth routes", () => {
     expect(response.status).toBe(200);
     expect(response.headers["x-powered-by"]).toBeUndefined();
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
+    expect(response.body.ai).toBeTruthy();
+    expect(typeof response.body.ai.configured).toBe("boolean");
+    expect(typeof response.body.ai.providerPreference).toBe("string");
+    expect(Array.isArray(response.body.ai.availableProviders)).toBe(true);
   });
 
   it("adds a request id header to responses", async () => {
@@ -92,6 +113,17 @@ describe("Workout and auth routes", () => {
     expect(updatedHistory.status).toBe(200);
     expect(updatedHistory.body.entries).toHaveLength(1);
     expect(updatedHistory.body.entries[0].payload.objetivo).toBe("hipertrofia");
+  });
+
+  it("returns generation source header when metadata is available", async () => {
+    mockGenerateWorkout.mockResolvedValueOnce(validResultWithMeta);
+
+    const response = await request(app)
+      .post("/api/generate-workout")
+      .send(validProfile);
+
+    expect(response.status).toBe(200);
+    expect(response.headers["x-generation-source"]).toBe("ai");
   });
 
   it("rejects invalid workout payload with validation issues", async () => {

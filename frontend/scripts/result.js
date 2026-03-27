@@ -301,7 +301,7 @@ function stripKnownSegments(text) {
     .replace(/^(?:\d+[\).:-]\s*)/, "")
     .replace(/(\d+\s*(?:series?)?\s*[xX]\s*\d+(?:\s*(?:a|-)\s*\d+)?(?:\s*repeticoes?)?)/i, "")
     .replace(/(?:carga\s*)?(leve|moderada|alta)\b/i, "")
-    .replace(/[|:-]+/g, " ")
+    .replace(/[|:]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -335,6 +335,13 @@ function parseExerciseLine(line, currentBlock) {
 
     if (!carga) {
       carga = extractCarga(part) || carga;
+    }
+
+    if (!grupoMuscular && extractCarga(part)) {
+      const groupMatchInPart = part.match(/\(([^)]+)\)\s*$/);
+      if (groupMatchInPart?.[1]) {
+        grupoMuscular = groupMatchInPart[1].trim();
+      }
     }
 
     if (index === 0 && !exercicio) {
@@ -668,6 +675,7 @@ function extractWorkoutSectionsFromStructuredPlan(workoutPlan) {
           seriesReps: `${String(item.series ?? "-").trim()} x ${String(item.repeticoes || "-").trim()}`,
           carga: String(item.carga || "-").trim().toLowerCase(),
           grupoMuscular: String(item.grupoMuscular || "-").trim() || "-",
+          tecnicaAvancada: String(item.tecnicaAvancada || "").trim(),
         }));
 
       return {
@@ -700,10 +708,60 @@ function toStringList(items) {
     : [];
 }
 
+function formatTechniqueLabel(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const labels = {
+    superserie: "Supersérie",
+    "bi-set": "Bi-set",
+    "tri-set": "Tri-set",
+    "rest-pause": "Rest-pause",
+    "drop-set": "Drop-set",
+    piramide: "Pirâmide",
+    "serie combinada": "Série combinada",
+  };
+
+  return labels[normalized] || normalized;
+}
+
+function exerciseNameHasTechniqueGuidance(exercicioNome) {
+  const normalized = String(exercicioNome || "").toLowerCase();
+  return /bi-set|tri-set|rest-pause|drop-set|superserie|piramide|serie combinada/.test(normalized);
+}
+
+function renderTechniqueBadge(tecnicaAvancada, exercicioNome) {
+  const label = formatTechniqueLabel(tecnicaAvancada);
+
+  if (!label) {
+    return "";
+  }
+
+  // Se o nome do exercício já descreve a técnica, evita repetir o bloco visual.
+  if (exerciseNameHasTechniqueGuidance(exercicioNome)) {
+    return "";
+  }
+
+  return `
+    <span class="workout-technique-badge">
+      <span class="workout-technique-caption">Técnica avançada:</span>
+      <span>${escapeHtml(label)}</span>
+    </span>
+  `;
+}
+
 function renderWorkoutRows(rows) {
   return rows.map((row) => `
     <tr>
-      <td>${escapeHtml(row.exercicio)}</td>
+      <td>
+        <div class="workout-exercise-cell">
+          <span class="workout-exercise-name">${escapeHtml(row.exercicio)}</span>
+          ${renderTechniqueBadge(row.tecnicaAvancada, row.exercicio)}
+        </div>
+      </td>
       <td>${escapeHtml(row.seriesReps)}</td>
       <td><span class="workout-load workout-load-${escapeHtml(String(row.carga).toLowerCase())}">${escapeHtml(row.carga)}</span></td>
       <td>${escapeHtml(row.grupoMuscular)}</td>

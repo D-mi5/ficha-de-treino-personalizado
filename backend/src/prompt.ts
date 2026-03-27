@@ -58,14 +58,16 @@ Aplicar esta lógica:
 3. REGRAS POR NÍVEL DE TREINO
 ========================================
 
+O nível declarado define obrigatoriamente a faixa de carga base da ficha. Restrições clínicas reais (idosa, comorbidade, risco articular, obesidade) têm prioridade e podem reduzir esse patamar quando necessário.
+
 - Iniciante:
-  sempre começar com cargas mais leves, foco em mobilidade, flexibilidade, técnica de execução, consciência corporal e adaptação.
+  cliente sem hábito de pegar peso, sem técnica consolidada e sem experiência de execução. Começar obrigatoriamente com cargas leves, foco em mobilidade, postura, técnica de execução, consciência corporal e adaptação neuromuscular. Progressão lenta e segura.
 
 - Intermediária:
-  usar cargas moderadas, progressão consistente, treino um pouco mais exigente, mantendo execução limpa e recuperação adequada.
+  cliente que já treina há algum tempo, tem base técnica e já carrega peso moderado com segurança. Usar cargas moderadas desde o início, progressão consistente, divisão mais estruturada. Ao longo do ciclo, pode evoluir gradualmente para cargas mais desafiadoras conforme a execução permitir.
 
 - Avançada:
-  pode trabalhar com cargas mais altas e maior sofisticação de divisão, desde que idade, contexto clínico e recuperação permitam.
+  cliente com experiência sólida, técnica consolidada, mobilidade adequada e histórico real de treino intenso. OBRIGATÓRIO prescrever cargas pesadas desde o início da ficha. Divisão mais sofisticada, maior volume e uso de técnicas de intensificação como prática padrão — não como exceção. A evolução se dá pelo aumento progressivo de carga e pela aplicação estratégica de técnicas avançadas (bi-set, tri-set, drop-set, rest-pause) ao longo do ciclo.
 
 ========================================
 4. PRIORIDADE CLÍNICA E SEGURANÇA
@@ -82,6 +84,26 @@ Se houver dor articular, limitação mecânica ou histórico de dor em joelho, c
 - priorizar estabilidade, controle de movimento e execução segura
 - usar exercícios e variações que não agravem a articulação
 - quando útil, preferir máquina, apoio ou exercício guiado
+
+Se houver dor no ombro ou limitação da cintura escapular:
+- evitar movimentos acima da cabeça, amplitudes extremas e cargas que provoquem dor
+- evitar exercícios de empurrar/puxar que agravem sintomas, principalmente em amplitude final dolorosa
+- priorizar pegadas neutras, máquinas guiadas, estabilidade escapular e progressão conservadora
+- substituir supino/desenvolvimento/elevações por variações mais estáveis e sem dor quando necessário
+
+Se houver dor na coluna, lombar, cervical ou histórico de dor irradiada:
+- evitar compressão axial excessiva, flexão lombar repetitiva e exercícios que aumentem dor durante a execução
+- evitar cargas altas em exercícios livres sem estabilidade quando houver sensibilidade ativa
+- priorizar máquinas guiadas, apoio de tronco, controle de tempo, amplitude segura e progressão conservadora
+- priorizar fortalecimento de core anti-extensão e anti-rotação, além de estabilidade lombo-pélvica
+- substituir agachamento livre pesado, levantamento terra tradicional pesado e remadas sem apoio por variações estáveis quando necessário
+
+Se houver dor no joelho, histórico patelofemoral ou limitação em flexão de joelho:
+- evitar impacto, salto, corrida intensa e pliometria agressiva
+- evitar amplitude dolorosa em agachamentos, leg press e afundos; trabalhar com amplitude segura e progressiva
+- priorizar exercícios guiados, controle excêntrico, estabilidade de joelho e progressão conservadora de carga
+- fortalecer quadríceps, glúteos e posterior de coxa com técnica limpa para melhorar proteção articular
+- substituir exercícios que gerem dor por variações estáveis em máquina, apoio ou isometria quando necessário
 
 Se houver cliente 60+:
 - cuidado com sobrecarga cardiovascular
@@ -281,60 +303,77 @@ Você deve orientar de forma curta e profissional:
 13. FORMATO OBRIGATÓRIO DA RESPOSTA
 ========================================
 
-Responder exatamente nesta estrutura:
+Responda em JSON válido. As 10 seções conceituais abaixo devem existir como conteúdo organizado dentro dos campos do JSON.
 
-1) Análise da cliente
+Mapeamento obrigatório entre conteúdo e campos:
+
+1) Análise da cliente -> campo "analise"
 - resumo técnico e profissional
 - citar nome da cliente de forma natural quando informado
 - explicar objetivo, nível, IMC, contexto clínico, intensidade e leitura geral do caso
 
-2) Ajuste de objetivo
+2) Ajuste de objetivo -> campo "ajusteObjetivo"
 - se houver mudança de objetivo, criar um bloco curto e profissional explicando a mudança
 - esse bloco precisa ser claro o suficiente para ser exibido em destaque visual na interface
 - se não houver ajuste, dizer brevemente que o objetivo foi mantido
 
-3) Estratégia da ficha
+3) Estratégia da ficha -> campo "estrategia"
 - explicar por que a divisão foi escolhida
 - explicar como idade, nível, periodicidade e segurança influenciaram o plano
+- se houver técnica avançada, justificar de forma curta e profissional por que ela foi usada
 
-4) Estrutura do ciclo
+4) Estrutura do ciclo -> campo "ciclo"
 - informar se é semanal, quinzenal ou mensal
 - se quinzenal, mostrar progressão da segunda semana
 - se mensal, mostrar progressão simples por semanas
 
-5) Ficha detalhada
-- Treino A
-- Treino B
-- Treino C
-- Treino D, se necessário
+5) Ficha detalhada -> campo "treinos"
+- cada treino deve ser um objeto dentro do array "treinos"
+- usar dia, nome e exercicios com estrutura clara e consistente
+- Treino A, Treino B, Treino C, Treino D, se necessário
 
-Para cada exercício, usar formato amigável para tabela, preferencialmente:
-Exercício - 3x10 a 12 - carga moderada (grupo muscular)
+Para cada exercício dentro de "exercicios", usar obrigatoriamente:
+- "nome"
+- "series"
+- "repeticoes"
+- "carga"
+- "grupoMuscular"
+
+Quando houver técnica avançada aplicada naquele exercício, você PODE incluir também o campo opcional:
+- "tecnicaAvancada"
+
+Valores padronizados aceitos para "tecnicaAvancada":
+- "superserie"
+- "bi-set"
+- "tri-set"
+- "rest-pause"
+- "drop-set"
+- "piramide"
+- "serie combinada"
 
 Regras rígidas para a ficha detalhada:
-- cada exercício deve ficar em uma linha separada
-- usar sempre a palavra carga seguida de leve, moderada ou alta
-- não usar tabela em markdown
-- não misturar explicações longas no meio da lista de exercícios
-- escrever apenas o nome do treino no título, por exemplo: Treino A
+- não usar markdown
+- não gerar campos extras fora do contrato
+- não misturar explicações longas dentro do array de exercícios
+- se usar "tecnicaAvancada", manter também o nome do exercício claro e natural
 
-6) Distribuição por dias
+6) Distribuição por dias -> campo "distribuicaoSemanal"
 - sugerir ordem prática de execução na semana
 - exemplo: segunda quadríceps, terça costas, quarta posteriores, quinta peito, sexta glúteo
 
-7) Substituições inteligentes
+7) Substituições inteligentes -> campo "substituicoes"
 - incluir 2 a 4 substituições úteis apenas quando necessário
 
-8) Dicas finais
+8) Dicas finais -> campo "cards.dicas"
 - entregar 3 a 5 dicas curtas, profissionais e úteis
 - incluir hidratação, execução, constância, recuperação ou mobilidade quando fizer sentido
 
-9) Comentários curtos para cards
+9) Comentários curtos para cards -> campo "cards.comentarios"
 - gerar de 2 a 4 comentários curtos, diretos e úteis
 - exemplos: hidratação, recuperação, cuidado técnico, constância, mobilidade
 - escrever em frases curtas para boa visualização em cards
 
-10) Fechamento profissional
+10) Fechamento profissional -> campo "observacoesFinais"
 - encerrar com uma orientação breve sobre consistência, segurança e evolução progressiva
 
 ========================================
@@ -363,6 +402,62 @@ Regras rígidas para a ficha detalhada:
 - não esquecer a influência da periodicidade
 
 ========================================
+16. TÉCNICAS AVANÇADAS DE INTENSIFICAÇÃO
+========================================
+
+Uso de técnicas conforme nível e foco:
+
+**INICIANTES (qualquer foco):**
+PROIBIDO usar técnicas avançadas. Priorizar técnica de execução, mobilidade e adaptação neuromuscular.
+
+**INTERMEDIÁRIAS SEM FOCO:**
+Manter séries retas com progressão linear de carga/repetições como base. NÃO aplicar técnicas avançadas quando o campo de foco não for preenchido.
+
+**INTERMEDIÁRIAS COM FOCO (RECOMENDADO):**
+Técnicas avançadas são PERMITIDAS E RECOMENDADAS APENAS no treino de ênfase (Treino A) e APENAS nos exercícios do grupo muscular foco solicitado. Nos demais exercícios e nos demais treinos (B, C, D, E...), manter séries retas e progressão linear.
+- Aplicar 2 técnicas por treino no treino de ênfase
+- Aplicar somente em exercícios do grupo foco
+- Grupos válidos para técnica por foco: quadríceps, posteriores, glúteos, costas e peito
+- Aplicar de forma estratégica nas semanas 2 e 3 do ciclo (após adaptação, antes do deload)
+
+**AVANÇADAS COM FOCO:**
+Técnicas avançadas são OBRIGATÓRIAS no treino de ênfase (Treino A) e devem aparecer APENAS nos exercícios do grupo muscular foco solicitado.
+- Aplicar de 2 a 3 técnicas por treino no treino de ênfase
+- Aplicar somente em exercícios do grupo foco
+- Grupos válidos para técnica por foco: quadríceps, posteriores, glúteos, costas e peito
+
+**AVANÇADAS SEM FOCO:**
+Manter progressão pesada e técnica de execução, sem obrigatoriedade de técnicas avançadas.
+
+Técnicas disponíveis:
+- supersérie: combinar 2 exercícios de forma sequencial, com descanso apenas ao final
+- bi-set: combinar 2 exercícios em sequência com descanso apenas ao final
+- tri-set: combinar 3 exercícios em sequência com descanso apenas ao final
+- rest-pause: pausa curta após quase falha e completar repetições adicionais com controle técnico
+- drop-set: reduzir a carga após a série principal para ampliar estímulo metabólico
+- pirâmide: variar carga e repetições de forma progressiva ou regressiva
+- série combinada ou variação mecânica: mudança de alavanca, apoio ou amplitude com sentido técnico
+
+Regras para aplicação (INTERMEDIÁRIAS com foco + AVANÇADAS):
+- escolher combinações com lógica clara:
+  antagonistas para fluidez e eficiência
+  mesmo grupamento para intensificação localizada
+- exemplos de combinações válidas:
+  costas + peito em supersérie com máquinas ou cabos
+  quadríceps + glúteos em bi-set no dia de inferiores
+  remada guiada + puxada na frente para densidade de trabalho
+  extensora + leg press em bi-set para ênfase em quadríceps
+- evitar combinações sem sentido técnico ou que comprometam execução
+- se a técnica comprometer execução, segurança ou recuperação, não utilizar
+- PROIBIDO usar técnicas avançadas se houver comorbidade, risco articular alto, obesidade importante ou idade 60+
+
+Se usar técnica avançada:
+- explicar de forma curta e profissional na estratégia da ficha por que ela foi aplicada
+- sinalizar de forma objetiva no nome do exercício, por exemplo: "Cadeira extensora (drop-set na última série)"
+- ou usar o campo "tecnicaAvancada" do JSON com valores padronizados: "bi-set", "tri-set", "drop-set", "rest-pause", "supersérie", "piramide", "serie combinada"
+- manter a prescrição clara, segura e fácil de executar em academia real
+
+========================================
 FORMATO DE RESPOSTA (OBRIGATÓRIO JSON)
 ========================================
 
@@ -389,7 +484,8 @@ Estrutura obrigatória:
           "series": 3,
           "repeticoes": "10 a 12",
           "carga": "moderada",
-          "grupoMuscular": "quadriceps"
+          "grupoMuscular": "quadriceps",
+          "tecnicaAvancada": "drop-set"
         }
       ]
     }
@@ -413,6 +509,8 @@ Estrutura obrigatória:
   },
   "observacoesFinais": "string"
 }
+
+Se não houver técnica avançada, omita o campo "tecnicaAvancada".
 `;
 
 function normalizeDisplayValue(value: string | undefined, fallback: string): string {
@@ -472,7 +570,8 @@ Entregue uma resposta profissional, altamente personalizada, segura, moderna e p
 Se houver foco de treino, inclua obrigatoriamente a linha "Enfase aplicada: ...".
 Se a periodicidade for quinzenal ou mensal, mostre com clareza como a progressão acontece dentro desse ciclo.
 Inclua aquecimento, cuidados de execução, hidratação, substituições úteis quando necessário e comentários curtos para cards.
-Na ficha detalhada, escreva cada exercício em formato fácil de converter em tabela, preferencialmente assim: "Exercício - 3x10 a 12 - carga moderada (grupo muscular)".
-Não use markdown de tabela. Use somente linhas simples e consistentes para que o frontend converta corretamente em tabela visual.
+Na ficha detalhada, preencha cada exercício como objeto JSON com nome, series, repeticoes, carga e grupoMuscular.
+Se usar técnica avançada em um exercício, você pode incluir o campo opcional tecnicaAvancada usando apenas os valores padronizados do contrato.
+Não use markdown. Retorne somente o JSON válido do contrato.
 `.trim();
 }

@@ -1,8 +1,9 @@
 import OpenAI from "openai";
 import { buildLocalWorkoutFallback } from "./local-workout-plan.js";
+import { logger } from "./logger.js";
 import { analyzeProfile } from "./metrics.js";
 import { buildWorkoutPrompt } from "./prompt.js";
-import { ClientProfile, WorkoutResponse } from "./types.js";
+import { ClientProfile, GenerationFallbackReason, WorkoutResponse } from "./types.js";
 import { workoutResponseSchema } from "./schemas.js";
 import { buildComplianceRetryInstruction } from "./workout-output-validator.js";
 
@@ -15,21 +16,56 @@ const IA_TIMEOUT_MS = Number(process.env.IA_TIMEOUT_MS || 45000);
 const IA_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 800;
 const TRANSIENT_RETRY_BASE_DELAY_MS = 1200;
+const AI_SCHEMA_DEBUG = String(process.env.AI_SCHEMA_DEBUG || "").trim().toLowerCase() === "true";
+const MAX_ADVANCED_TECHNIQUES_PER_TRAINING = 2;
+const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || 0.25);
+const AI_MAX_TOKENS = Number(process.env.AI_MAX_TOKENS || 2800);
+const AI_SYSTEM_PROMPT = [
+  "Você é uma personal trainer sênior com foco em segurança clínica, prescrição feminina e resposta estruturada.",
+  "Responda somente com JSON válido, sem markdown e sem texto fora do objeto.",
+  "Siga rigorosamente o contrato solicitado pelo prompt do usuário.",
+  "Priorize consistência clínica, clareza, segurança articular e aderência exata aos campos esperados.",
+].join(" ");
 
 type ParseFailureReason = "empty" | "json-parse" | "schema";
 
 class WorkoutPayloadParseError extends Error {
   reason: ParseFailureReason;
+  details: string[];
 
-  constructor(message: string, reason: ParseFailureReason) {
+  constructor(message: string, reason: ParseFailureReason, details: string[] = []) {
     super(message);
     this.name = "WorkoutPayloadParseError";
     this.reason = reason;
+    this.details = details;
   }
 }
 
 function hasValidKey(value: string | undefined): boolean {
   return Boolean(value && value.trim() && !value.includes("sua_chave_aqui"));
+}
+
+export interface GenerationReadiness {
+  configured: boolean;
+  providerPreference: string;
+  availableProviders: AiProvider[];
+  hasOpenAiKey: boolean;
+  hasGeminiKey: boolean;
+}
+
+export function getGenerationReadiness(): GenerationReadiness {
+  const providerPreference = (process.env.AI_PROVIDER || "").trim().toLowerCase() || "auto";
+  const hasOpenAiKey = hasValidKey(process.env.OPENAI_API_KEY);
+  const hasGeminiKey = hasValidKey(process.env.GEMINI_API_KEY) || hasOpenAiKey;
+  const availableProviders = resolveProviderOrder();
+
+  return {
+    configured: hasOpenAiKey || hasGeminiKey,
+    providerPreference,
+    availableProviders,
+    hasOpenAiKey,
+    hasGeminiKey,
+  };
 }
 
 function resolveProviderOrder(): AiProvider[] {
@@ -152,6 +188,157 @@ function parseJsonWithRecovery(candidate: string): unknown {
   }
 }
 
+function normalizeCargaValue(value: unknown): unknown {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (!normalized) {
+    return value;
+  }
+
+  if (normalized === "leve") return "leve";
+  if (normalized === "moderada" || normalized === "moderado" || normalized === "media" || normalized === "média") return "moderada";
+  if (normalized === "alta" || normalized === "intensa") return "alta";
+
+  return value;
+}
+
+function normalizeTechniqueValue(value: unknown): unknown {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (!normalized) {
+    return value;
+  }
+
+  const map: Record<string, string> = {
+    superserie: "superserie",
+    "super-serie": "superserie",
+    "super serie": "superserie",
+    biset: "bi-set",
+    "bi set": "bi-set",
+    "bi-set": "bi-set",
+    triset: "tri-set",
+    "tri set": "tri-set",
+    "tri-set": "tri-set",
+    restpause: "rest-pause",
+    "rest pause": "rest-pause",
+    "rest-pause": "rest-pause",
+    dropset: "drop-set",
+    "drop set": "drop-set",
+    "drop-set": "drop-set",
+    piramide: "piramide",
+    "serie combinada": "serie combinada",
+    "serie-combinada": "serie combinada",
+  };
+
+  return map[normalized] || value;
+}
+
+function normalizeWorkoutPlanCandidate(candidate: unknown): unknown {
+  if (!candidate || typeof candidate !== "object") {
+    return candidate;
+  }
+
+  const plan = candidate as Record<string, unknown>;
+  const normalizedPlan: Record<string, unknown> = { ...plan };
+
+  if (Array.isArray(plan.treinos)) {
+    normalizedPlan.treinos = plan.treinos.map((treino) => {
+      if (!treino || typeof treino !== "object") {
+        return treino;
+      }
+
+      const normalizedTreino = { ...(treino as Record<string, unknown>) };
+
+      if (Array.isArray(normalizedTreino.exercicios)) {
+        normalizedTreino.exercicios = normalizedTreino.exercicios.map((exercicio) => {
+          if (!exercicio || typeof exercicio !== "object") {
+            return exercicio;
+          }
+
+          const normalizedExercicio = { ...(exercicio as Record<string, unknown>) };
+
+          if (typeof normalizedExercicio.series === "string") {
+            const parsedSeries = Number.parseInt(normalizedExercicio.series, 10);
+            if (Number.isFinite(parsedSeries)) {
+              normalizedExercicio.series = parsedSeries;
+            }
+          }
+
+          if (typeof normalizedExercicio.repeticoes === "number") {
+            normalizedExercicio.repeticoes = String(normalizedExercicio.repeticoes);
+          }
+
+          normalizedExercicio.carga = normalizeCargaValue(normalizedExercicio.carga);
+
+          if (Object.prototype.hasOwnProperty.call(normalizedExercicio, "tecnicaAvancada")) {
+            normalizedExercicio.tecnicaAvancada = normalizeTechniqueValue(normalizedExercicio.tecnicaAvancada);
+          }
+
+          return normalizedExercicio;
+        });
+      }
+
+      return normalizedTreino;
+    });
+  }
+
+  return normalizedPlan;
+}
+
+function profileAllowsAdvancedTechniques(profile: ClientProfile, analysis: WorkoutResponse["analysis"]): boolean {
+  return profile.nivel === "avancado"
+    && (analysis.objetivoFinal === "hipertrofia" || analysis.objetivoFinal === "definicao")
+    && analysis.nivelRisco !== "alto";
+}
+
+export function applyTechniqueSafetyGuards(response: WorkoutResponse, profile: ClientProfile): WorkoutResponse {
+  if (typeof response.workoutPlan === "string") {
+    return response;
+  }
+
+  const canUseAdvancedTechniques = profileAllowsAdvancedTechniques(profile, response.analysis);
+
+  const treinos = response.workoutPlan.treinos.map((treino) => {
+    let preservedTechniques = 0;
+
+    const exercicios = treino.exercicios.map((exercicio) => {
+      if (!exercicio.tecnicaAvancada) {
+        return exercicio;
+      }
+
+      if (!canUseAdvancedTechniques) {
+        const { tecnicaAvancada: _tecnicaAvancada, ...safeExercise } = exercicio;
+        return safeExercise;
+      }
+
+      preservedTechniques += 1;
+      if (preservedTechniques <= MAX_ADVANCED_TECHNIQUES_PER_TRAINING) {
+        return exercicio;
+      }
+
+      const { tecnicaAvancada: _tecnicaAvancada, ...safeExercise } = exercicio;
+      return safeExercise;
+    });
+
+    return {
+      ...treino,
+      exercicios,
+    };
+  });
+
+  return {
+    ...response,
+    workoutPlan: {
+      ...response.workoutPlan,
+      treinos,
+    },
+  };
+}
+
 function parseAndValidateWorkoutResponse(content: string, analysis: WorkoutResponse["analysis"]): WorkoutResponse {
   const normalizedContent = String(content || "").trim();
   if (!normalizedContent) {
@@ -167,19 +354,55 @@ function parseAndValidateWorkoutResponse(content: string, analysis: WorkoutRespo
     throw new WorkoutPayloadParseError("A IA não retornou um JSON parseável no formato obrigatório.", "json-parse");
   }
 
+  const normalizedWorkoutPlan = normalizeWorkoutPlanCandidate(parsedWorkoutPlan);
+
   const structuredValidation = workoutResponseSchema.safeParse({
-    workoutPlan: parsedWorkoutPlan,
+    workoutPlan: normalizedWorkoutPlan,
     analysis,
   });
 
   if (!structuredValidation.success) {
+    const details = structuredValidation.error.issues
+      .slice(0, 8)
+      .map((issue) => {
+        const path = issue.path.length > 0 ? issue.path.join(".") : "root";
+        return `${path}: ${issue.message}`;
+      });
+
     throw new WorkoutPayloadParseError(
       "A IA não retornou um JSON válido no formato obrigatório.",
       "schema",
+      details,
     );
   }
 
   return structuredValidation.data;
+}
+
+function classifyFallbackReason(error: unknown): GenerationFallbackReason {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error || "").toLowerCase();
+
+  if (!message) {
+    return "unknown";
+  }
+
+  if (message.includes("timeout")) {
+    return "timeout";
+  }
+
+  if (message.includes("json") || message.includes("schema") || message.includes("parse")) {
+    return "invalid-output";
+  }
+
+  if (message.includes("api_key") || message.includes("não foi configurada") || message.includes("not configured")) {
+    return "missing-credentials";
+  }
+
+  if (message.includes("503") || message.includes("429") || message.includes("rate limit") || message.includes("service unavailable")) {
+    return "provider-unavailable";
+  }
+
+  return "unknown";
 }
 
 function getComplianceInstructionFromError(error: unknown): string {
@@ -195,9 +418,14 @@ function getComplianceInstructionFromError(error: unknown): string {
   }
 
   if (error.reason === "schema") {
+    const issueHints = error.details.length > 0
+      ? error.details.map((detail) => `Detalhe de validação: ${detail}`)
+      : [];
+
     return buildComplianceRetryInstruction([
       "A resposta da IA não respeitou o JSON obrigatório esperado.",
       "Envie JSON válido com os campos analise, ajusteObjetivo, estrategia, ciclo, treinos, distribuicaoSemanal, substituicoes, cards e observacoesFinais.",
+      ...issueHints,
     ]);
   }
 
@@ -210,12 +438,12 @@ async function requestCompletionWithTimeout(client: OpenAI, model: string, promp
   try {
     const completionPromise = client.chat.completions.create({
       model,
-      temperature: 0.7,
+      temperature: AI_TEMPERATURE,
+      max_tokens: AI_MAX_TOKENS,
       messages: [
         {
           role: "system",
-          content:
-            "Você é uma profissional de educação física e personal trainer sênior, com linguagem objetiva, segura e baseada em evidências.",
+          content: AI_SYSTEM_PROMPT,
         },
         {
           role: "user",
@@ -261,9 +489,35 @@ export async function generateWorkout(profile: ClientProfile): Promise<WorkoutRe
         const model = getModel(provider);
         const completion = await requestCompletionWithTimeout(client, model, promptForAttempt);
         const content = completion.choices[0]?.message?.content?.trim();
-        return parseAndValidateWorkoutResponse(content || "", analysis);
+        const response = parseAndValidateWorkoutResponse(content || "", analysis);
+
+        logger.info("generate_workout_provider_success", {
+          provider,
+          model,
+          attempt,
+          objetivo: profile.objetivo,
+          diasSemana: profile.diasSemana,
+        });
+
+        return applyTechniqueSafetyGuards({
+          ...response,
+          generationMeta: {
+            source: "ai",
+            provider,
+            model,
+            attempts: attempt,
+          },
+        }, profile);
       } catch (error) {
         lastError = error;
+
+        if (AI_SCHEMA_DEBUG && isWorkoutPayloadParseError(error) && error.reason === "schema") {
+          logger.warn("generate_workout_schema_mismatch", {
+            provider,
+            attempt,
+            issues: error.details.slice(0, 5),
+          });
+        }
 
         if (attempt < IA_MAX_ATTEMPTS) {
           const instruction = getComplianceInstructionFromError(error);
@@ -289,5 +543,21 @@ export async function generateWorkout(profile: ClientProfile): Promise<WorkoutRe
   }
 
   // Falha controlada de provedor/parsing: mantém contrato estruturado com fallback local.
-  return buildLocalWorkoutFallback(profile, analysis);
+  const fallbackResponse = buildLocalWorkoutFallback(profile, analysis);
+  const fallbackReason = classifyFallbackReason(lastError);
+
+  logger.warn("generate_workout_fallback_local", {
+    reason: fallbackReason,
+    objetivo: profile.objetivo,
+    diasSemana: profile.diasSemana,
+  });
+
+  return applyTechniqueSafetyGuards({
+    ...fallbackResponse,
+    generationMeta: {
+      source: "fallback-local",
+      attempts: IA_MAX_ATTEMPTS,
+      fallbackReason,
+    },
+  }, profile);
 }

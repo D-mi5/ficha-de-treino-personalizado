@@ -22,6 +22,28 @@ const goReadyResultEl = document.getElementById("go-ready-result");
 
 let allHistory = [];
 const LOCAL_HISTORY_KEY = "workoutHistory";
+const PLAN_PREVIEW_MAX_LENGTH = 100;
+const GOAL_LABELS = {
+  emagrecimento: "Emagrecimento",
+  hipertrofia: "Hipertrofia",
+  definicao: "Definição",
+};
+const GOAL_BADGE_CLASSES = {
+  emagrecimento: "border-neonGreen/40 bg-neonGreen/10 text-neonGreen",
+  hipertrofia: "border-neonYellow/40 bg-neonYellow/10 text-neonYellow",
+  definicao: "border-pink-300/50 bg-pink-300/10 text-pink-200",
+};
+const DEFAULT_GOAL_BADGE_CLASS = "border-white/30 bg-white/10 text-white";
+const CADENCE_DAYS = {
+  semanal: 7,
+  quinzenal: 14,
+  mensal: 30,
+};
+const CADENCE_LABELS = {
+  semanal: "Semanal",
+  quinzenal: "Quinzenal",
+  mensal: "Mensal",
+};
 const DEFAULT_CLINICAL_RULES = {
   idadeIdosaMinima: 60,
   imcObesidade: 30,
@@ -53,6 +75,19 @@ function getLocalHistory() {
   }
 }
 
+function normalizeGoal(goal) {
+  return String(goal || "").trim().toLowerCase();
+}
+
+function truncateText(value, maxLength) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+}
+
 function formatImc(entry) {
   const imcNumber = Number(entry?.result?.analysis?.imc);
   if (Number.isFinite(imcNumber) && imcNumber > 0) {
@@ -62,26 +97,17 @@ function formatImc(entry) {
 }
 
 function formatGoalLabel(goal) {
-  const value = String(goal || "").trim().toLowerCase();
-  if (value === "emagrecimento") return "Emagrecimento";
-  if (value === "hipertrofia") return "Hipertrofia";
-  if (value === "definicao") return "Definição";
-  return "-";
+  return GOAL_LABELS[normalizeGoal(goal)] || "-";
 }
 
 function getGoalBadgeClass(goal) {
-  const value = String(goal || "").trim().toLowerCase();
-  if (value === "emagrecimento") return "border-neonGreen/40 bg-neonGreen/10 text-neonGreen";
-  if (value === "hipertrofia") return "border-neonYellow/40 bg-neonYellow/10 text-neonYellow";
-  if (value === "definicao") return "border-pink-300/50 bg-pink-300/10 text-pink-200";
-  return "border-white/30 bg-white/10 text-white";
+  return GOAL_BADGE_CLASSES[normalizeGoal(goal)] || DEFAULT_GOAL_BADGE_CLASS;
 }
 
 function buildPlanPreview(result) {
   const workoutPlan = result?.workoutPlan;
   if (typeof workoutPlan === "string") {
-    const text = workoutPlan.trim();
-    return text.length > 100 ? `${text.slice(0, 100)}...` : text || "Sem resumo disponível";
+    return truncateText(workoutPlan, PLAN_PREVIEW_MAX_LENGTH) || "Sem resumo disponível";
   }
 
   if (workoutPlan && typeof workoutPlan === "object") {
@@ -91,8 +117,7 @@ function buildPlanPreview(result) {
       String(workoutPlan?.ciclo || "").trim(),
     ].filter(Boolean);
 
-    const text = parts.join(" ").trim();
-    return text.length > 100 ? `${text.slice(0, 100)}...` : text || "Sem resumo disponível";
+    return truncateText(parts.join(" "), PLAN_PREVIEW_MAX_LENGTH) || "Sem resumo disponível";
   }
 
   return "Sem resumo disponível";
@@ -168,15 +193,11 @@ function formatPeriodLabel(startIso, endIso) {
 }
 
 function getCadenceDays(periodicidade) {
-  if (periodicidade === "quinzenal") return 14;
-  if (periodicidade === "mensal") return 30;
-  return 7;
+  return CADENCE_DAYS[periodicidade] || CADENCE_DAYS.semanal;
 }
 
 function getCadenceLabel(periodicidade) {
-  if (periodicidade === "quinzenal") return "Quinzenal";
-  if (periodicidade === "mensal") return "Mensal";
-  return "Semanal";
+  return CADENCE_LABELS[periodicidade] || CADENCE_LABELS.semanal;
 }
 
 function getEntryPeriodicidade(entry) {

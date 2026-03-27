@@ -1,18 +1,54 @@
 import { Express } from "express";
 import { generateWorkout } from "../agents.js";
+import { getGenerationReadiness } from "../agents.js";
 import { createAuditMiddleware } from "../audit.js";
 import { addWorkoutToHistory } from "../history.js";
 import { logger } from "../logger.js";
 import { generateWorkoutRateLimiter } from "../rate-limiters.js";
-import { ClientProfile } from "../types.js";
 import { profileSchema } from "../schemas.js";
 import { respondValidationError } from "./route-helpers.js";
 
 const WORKOUT_ROUTE = "/api/generate-workout";
 
+function classifyGenerateError(error: unknown): {
+  statusCode: number;
+  userMessage: string;
+  isTimeout: boolean;
+  errorMessage: string;
+} {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const normalizedMessage = errorMessage.toLowerCase();
+  const isTimeout = normalizedMessage.includes("timeout");
+  const isProviderUnavailable = /503|service unavailable|temporarily unavailable|rate limit|429/.test(normalizedMessage);
+  const statusCode = isTimeout ? 504 : isProviderUnavailable ? 503 : 500;
+
+  const userMessage = isTimeout
+    ? "A IA levou muito tempo para responder. Tente novamente em alguns instantes."
+    : isProviderUnavailable
+      ? "O provedor de IA está instável no momento (503/limite). Tente novamente em alguns instantes."
+      : "Não foi possível gerar a ficha de treino no momento. Tente novamente mais tarde.";
+
+  return {
+    statusCode,
+    userMessage,
+    isTimeout,
+    errorMessage,
+  };
+}
+
 export function registerWorkoutRoutes(app: Express): void {
   app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, service: "workout-generator" });
+    const readiness = getGenerationReadiness();
+
+    res.json({
+      ok: true,
+      service: "workout-generator",
+      ai: {
+        configured: readiness.configured,
+        providerPreference: readiness.providerPreference,
+        availableProviders: readiness.availableProviders,
+      },
+    });
   });
 
   app.post(WORKOUT_ROUTE, generateWorkoutRateLimiter, createAuditMiddleware("generate_workout"), async (req, res) => {
@@ -29,8 +65,11 @@ export function registerWorkoutRoutes(app: Express): void {
     }
 
     try {
-      const profile = parsed.data as ClientProfile;
+      const profile = parsed.data;
       const result = await generateWorkout(profile);
+      const generationSource = result.generationMeta?.source || "unknown";
+
+      res.setHeader("X-Generation-Source", generationSource);
 
       if (req.clientId) {
         addWorkoutToHistory(req.clientId, profile, result);
@@ -42,14 +81,12 @@ export function registerWorkoutRoutes(app: Express): void {
         clientId: req.clientId,
         objetivo: profile.objetivo,
         diasSemana: profile.diasSemana,
+        generationSource,
       });
 
       return res.json(result);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isTimeout = errorMessage.includes("Timeout");
-      const isProviderUnavailable = /503|service unavailable|temporarily unavailable|rate limit|429/i.test(errorMessage);
-      const statusCode = isTimeout ? 504 : isProviderUnavailable ? 503 : 500;
+      const { errorMessage, isTimeout, statusCode, userMessage } = classifyGenerateError(error);
 
       logger.error("generate_workout_failed", {
         route: WORKOUT_ROUTE,
@@ -58,12 +95,6 @@ export function registerWorkoutRoutes(app: Express): void {
         error: errorMessage,
         isTimeout,
       });
-
-      const userMessage = isTimeout
-        ? "A IA levou muito tempo para responder. Tente novamente em alguns instantes."
-        : isProviderUnavailable
-          ? "O provedor de IA está instável no momento (503/limite). Tente novamente em alguns instantes."
-          : "Não foi possível gerar a ficha de treino no momento. Tente novamente mais tarde.";
 
       return res.status(statusCode).json({ error: userMessage });
     }

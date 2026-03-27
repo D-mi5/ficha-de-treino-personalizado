@@ -19,6 +19,17 @@ const signupPasswordStrengthBarEl = document.getElementById("signup-password-str
 const signupPasswordStrengthLabelEl = document.getElementById("signup-password-strength-label");
 const signupSubmitEl = document.getElementById("signup-submit");
 const signupErrorEl = document.getElementById("signup-error");
+const LAST_REGISTERED_EMAIL_KEY = "ficha-femme:last-registered-email";
+const AUTH_BUTTON_LABELS = {
+  login: {
+    idle: "Entrar na minha conta",
+    loading: "Entrando...",
+  },
+  signup: {
+    idle: "Criar minha conta",
+    loading: "Criando conta...",
+  },
+};
 
 const params = new URLSearchParams(window.location.search);
 const nextPath = params.get("next") || "/form";
@@ -62,6 +73,20 @@ function setButtonLoading(buttonEl, isLoading, baseLabel, loadingLabel) {
   buttonEl.disabled = isLoading;
   buttonEl.classList.toggle("is-loading", isLoading);
   buttonEl.textContent = isLoading ? loadingLabel : baseLabel;
+}
+
+function setAuthButtonLoading(type, isLoading) {
+  if (type === "login") {
+    setButtonLoading(loginSubmitEl, isLoading, AUTH_BUTTON_LABELS.login.idle, AUTH_BUTTON_LABELS.login.loading);
+    return;
+  }
+
+  setButtonLoading(signupSubmitEl, isLoading, AUTH_BUTTON_LABELS.signup.idle, AUTH_BUTTON_LABELS.signup.loading);
+}
+
+function clearAuthErrors() {
+  clearError(loginErrorEl);
+  clearError(signupErrorEl);
 }
 
 function setTabActiveState(activeTab) {
@@ -172,13 +197,64 @@ function bindPasswordToggle(buttonEl, inputEl) {
   });
 }
 
+function clearSignupFields() {
+  if (signupFormEl instanceof HTMLFormElement) {
+    signupFormEl.reset();
+  }
+
+  if (signupEmailEl instanceof HTMLInputElement) {
+    signupEmailEl.value = "";
+  }
+
+  if (signupPasswordEl instanceof HTMLInputElement) {
+    signupPasswordEl.value = "";
+    signupPasswordEl.setAttribute("autocomplete", "new-password");
+  }
+
+  if (signupPasswordConfirmEl instanceof HTMLInputElement) {
+    signupPasswordConfirmEl.value = "";
+    signupPasswordConfirmEl.setAttribute("autocomplete", "new-password");
+  }
+
+  renderPasswordStrength("");
+}
+
+function clearSignupSensitiveFields() {
+  if (signupPasswordEl instanceof HTMLInputElement) {
+    signupPasswordEl.value = "";
+    renderPasswordStrength("");
+  }
+
+  if (signupPasswordConfirmEl instanceof HTMLInputElement) {
+    signupPasswordConfirmEl.value = "";
+  }
+}
+
+function clearLoginPasswordField() {
+  if (loginPasswordEl instanceof HTMLInputElement) {
+    loginPasswordEl.value = "";
+    loginPasswordEl.setAttribute("autocomplete", "off");
+  }
+}
+
+function scheduleSignupAutofillGuard() {
+  const delays = [0, 60, 180, 420, 900];
+  delays.forEach((delay) => {
+    window.setTimeout(() => {
+      if (tabSignupEl?.classList.contains("active")) {
+        clearSignupFields();
+      }
+    }, delay);
+  });
+}
+
 function activateLoginTab({ focusField = false } = {}) {
   loginFormEl?.classList.remove("hidden");
   signupFormEl?.classList.add("hidden");
   setTabActiveState("login");
+  clearLoginPasswordField();
 
-  clearError(loginErrorEl);
-  clearError(signupErrorEl);
+  clearAuthErrors();
 
   if (focusField) {
     if (loginPasswordEl instanceof HTMLInputElement && loginEmailEl instanceof HTMLInputElement && loginEmailEl.value) {
@@ -193,9 +269,10 @@ function activateSignupTab({ focusField = false } = {}) {
   loginFormEl?.classList.add("hidden");
   signupFormEl?.classList.remove("hidden");
   setTabActiveState("signup");
+  clearSignupFields();
+  scheduleSignupAutofillGuard();
 
-  clearError(loginErrorEl);
-  clearError(signupErrorEl);
+  clearAuthErrors();
 
   if (focusField && signupEmailEl instanceof HTMLInputElement) {
     signupEmailEl.focus();
@@ -213,6 +290,12 @@ function transferSignupEmailToLogin() {
 function openLoginFormAfterSignup(email) {
   if (loginEmailEl instanceof HTMLInputElement) {
     loginEmailEl.value = normalizeEmail(email);
+  }
+
+  try {
+    localStorage.setItem(LAST_REGISTERED_EMAIL_KEY, normalizeEmail(email));
+  } catch {
+    // Ignora falha de armazenamento local (modo privado/permissões).
   }
 
   // Mantém a URL consistente com o estado atual da aba sem recarregar a página.
@@ -247,14 +330,14 @@ loginFormEl?.addEventListener("submit", async (event) => {
   }
 
   try {
-    setButtonLoading(loginSubmitEl, true, "Entrar na minha conta", "Entrando...");
+    setAuthButtonLoading("login", true);
     await window.apiClient.login(email, password);
     window.location.href = nextPath;
   } catch (error) {
     console.error(error);
     showError(loginErrorEl, getSafeErrorMessage(error));
   } finally {
-    setButtonLoading(loginSubmitEl, false, "Entrar na minha conta", "Entrando...");
+    setAuthButtonLoading("login", false);
   }
 });
 
@@ -283,17 +366,10 @@ signupFormEl?.addEventListener("submit", async (event) => {
   }
 
   try {
-    setButtonLoading(signupSubmitEl, true, "Criar minha conta", "Criando conta...");
+    setAuthButtonLoading("signup", true);
     await window.apiClient.register(email, password);
 
-    if (signupPasswordEl instanceof HTMLInputElement) {
-      signupPasswordEl.value = "";
-      renderPasswordStrength("");
-    }
-
-    if (signupPasswordConfirmEl instanceof HTMLInputElement) {
-      signupPasswordConfirmEl.value = "";
-    }
+    clearSignupSensitiveFields();
 
     transferSignupEmailToLogin();
     openLoginFormAfterSignup(email);
@@ -302,7 +378,7 @@ signupFormEl?.addEventListener("submit", async (event) => {
     console.error("Signup error:", error);
     showError(signupErrorEl, getSafeErrorMessage(error));
   } finally {
-    setButtonLoading(signupSubmitEl, false, "Criar minha conta", "Criando conta...");
+    setAuthButtonLoading("signup", false);
   }
 });
 
@@ -316,6 +392,26 @@ if (prefillLoginEmail && loginEmailEl instanceof HTMLInputElement) {
   loginEmailEl.value = prefillLoginEmail;
   activateLoginTab({ focusField: true });
 }
+
+if (!prefillLoginEmail && loginEmailEl instanceof HTMLInputElement) {
+  try {
+    const lastRegisteredEmail = normalizeEmail(localStorage.getItem(LAST_REGISTERED_EMAIL_KEY) || "");
+    if (lastRegisteredEmail) {
+      loginEmailEl.value = lastRegisteredEmail;
+    }
+  } catch {
+    // Sem acesso a storage, segue sem prefill persistido.
+  }
+}
+
+window.addEventListener("pageshow", () => {
+  if (tabSignupEl?.classList.contains("active")) {
+    activateSignupTab({ focusField: false });
+    return;
+  }
+
+  clearLoginPasswordField();
+});
 
 if (signupPasswordEl instanceof HTMLInputElement) {
   signupPasswordEl.addEventListener("input", (event) => {

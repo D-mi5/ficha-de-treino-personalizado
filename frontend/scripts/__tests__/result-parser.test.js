@@ -108,6 +108,22 @@ Agachamento guiado - 3x10 a 12 - carga moderada (quadriceps)
     });
   });
 
+  it("preserves advanced-technique notes in exercise names", () => {
+    const rows = api.extractWorkoutRows(`
+Treino A
+Cadeira extensora (drop-set na ultima serie) - 3x10 a 12 - carga moderada (quadriceps)
+    `);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      bloco: "Treino A",
+      exercicio: "Cadeira extensora (drop-set na ultima serie)",
+      seriesReps: "3x10 a 12",
+      carga: "moderada",
+      grupoMuscular: "quadriceps",
+    });
+  });
+
   it("parses exercise rows with pipe format", () => {
     const rows = api.extractWorkoutRows(`
 Treino B
@@ -150,5 +166,56 @@ Observação: controle a descida e evite compensações.
     expect(html).toContain("workout-note-item");
     expect(html).toContain("workout-load-moderada");
     expect(html).toContain("Treino A - Quadriceps");
+  });
+
+  it("renders advanced-technique badges for structured workout plans", () => {
+    const html = api.renderWorkoutContent({
+      analise: "Perfil avançado com boa recuperação.",
+      ajusteObjetivo: "Objetivo mantido em hipertrofia.",
+      estrategia: "Uso pontual de intensificação em exercício estável.",
+      ciclo: "Ciclo semanal.",
+      treinos: [
+        {
+          dia: "A",
+          nome: "Glúteos prioritários",
+          exercicios: [
+            {
+              nome: "Elevação pélvica",
+              series: 4,
+              repeticoes: "8 a 10",
+              carga: "alta",
+              grupoMuscular: "gluteos",
+              tecnicaAvancada: "drop-set",
+            },
+            {
+              nome: "Abdução de quadril",
+              series: 3,
+              repeticoes: "12 a 15",
+              carga: "moderada",
+              grupoMuscular: "gluteos",
+            },
+            {
+              nome: "Passada com halteres",
+              series: 3,
+              repeticoes: "10 a 12",
+              carga: "moderada",
+              grupoMuscular: "gluteos",
+            },
+          ],
+        },
+      ],
+      distribuicaoSemanal: ["Segunda: Treino A", "Quinta: Treino A"],
+      substituicoes: ["Trocar por máquina guiada se necessário."],
+      cards: {
+        comentarios: ["Execução firme.", "Recuperação adequada."],
+        dicas: ["Aqueça antes das séries principais.", "Respeite o intervalo."],
+      },
+      observacoesFinais: "Manter progressão com técnica estável.",
+    });
+
+    expect(html).toContain("workout-technique-badge");
+    expect(html).toContain("Técnica avançada:");
+    expect(html).toContain("Drop-set");
+    expect(html).toContain("Elevação pélvica");
   });
 });

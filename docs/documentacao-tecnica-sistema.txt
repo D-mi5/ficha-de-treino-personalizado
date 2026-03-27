@@ -172,6 +172,25 @@ StructuredWorkoutPlan contem:
 - Backend prioriza grupamento no template dos treinos.
 - Frontend tambem restringe foco para iniciantes.
 
+6.6 Tecnicas avancadas por foco (regra atual)
+- Tecnicas avancadas so entram quando o campo de foco esta preenchido com grupamento valido.
+- Grupamentos validos para aplicacao de tecnica:
+  quadriceps, posteriores, gluteo, costas e peito.
+- Sem foco preenchido: nao aplicar tecnica avancada.
+- Com foco preenchido: aplicar tecnicas apenas nos exercicios do grupamento foco.
+- O treino de enfase nao e mais fixo por letra; e identificado dinamicamente como o primeiro treino da semana que contem o grupamento foco.
+- Intermediaria com foco: aplica 2 tecnicas no treino de enfase (bi-set e tri-set) apenas no grupo foco.
+- Avancada com foco e intensidade intensa: aplica ate 3 tecnicas no treino de enfase (bi-set, tri-set e rest-pause) apenas no grupo foco.
+
+6.7 Ficha autoexplicativa para cliente final
+- Para evitar duvida operacional, a descricao da tecnica e incorporada no nome do exercicio.
+- Bi-set: ficha exibe explicitamente o par de exercicios do mesmo grupo.
+- Tri-set: ficha exibe explicitamente os 3 exercicios do mesmo grupo e a ordem de execucao.
+- Rest-pause/drop-set e demais metodos: ficha exibe instrucoes curtas de execucao e descanso.
+- Exemplo de saida:
+  "Leg press (tri-set: Cadeira extensora + Leg press + Hack machine, em sequencia sem descanso; descansar 60-90s ao final)".
+- Para evitar duplicidade visual, se o nome do exercicio ja contem a explicacao da tecnica, o frontend nao renderiza o selo "Tecnica avancada" em separado.
+
 
 7. TRATAMENTO DE RISCO
 
@@ -237,6 +256,9 @@ Ajustes automaticos relevantes:
 - Evolucao automatica por ciclo:
   aplicar ajuste incremental da prescricao usando historico recente e aderencia.
 
+- Rotacao de metodos avancados entre ciclos:
+  alternar tecnicas (ex.: bi-set/tri-set para drop-set/rest-pause) a cada nova ficha mensal, condicionado a seguranca clinica, execucao e recuperacao.
+
 - Historico de treino mais rico:
   armazenar metadados de concluido/nao concluido por sessao para feedback de progressao.
 
@@ -245,6 +267,41 @@ Ajustes automaticos relevantes:
 
 - Exportacao PDF:
   gerar ficha final em formato imprimivel com layout padronizado e assinatura de versao.
+
+
+11. CHANGELOG TECNICO (ATUALIZACOES RECENTES)
+
+Data de referencia: 2026-03-27
+
+- Regras de intensidade por nivel revisadas:
+  avancado com perfil clinico seguro nao e mais rebaixado automaticamente por idade isolada.
+
+- Prompt reforcado para nivel avancado:
+  cargas pesadas e tecnicas avancadas passaram a ser tratadas como padrao estrutural quando clinicamente permitido.
+
+- Cobertura clinica regional ampliada:
+  deteccao e orientacao especifica para dor/risco em ombro, coluna e joelho.
+
+- Fallback local fortalecido com seguranca articular:
+  filtro de exercicios por risco regional, substituicoes conservadoras e adaptacao de nome para execucao segura quando necessario.
+
+- Distribuicao de grupos corrigida:
+  separacao entre anterior e posterior em divisoes de 4/5 dias, evitando mistura indevida de quadriceps e gluteos fora da estrategia definida.
+
+- Tecnicas avancadas por foco (regra operacional vigente):
+  aplicacao condicionada a foco preenchido e restrita aos grupamentos foco validos (quadriceps, posteriores, gluteo, costas e peito).
+
+- Treino de enfase identificado dinamicamente:
+  primeiro treino da semana que contem o grupamento foco, sem depender fixamente da letra A.
+
+- Ficha autoexplicativa para cliente final:
+  instrucoes operacionais incorporadas no nome do exercicio para bi-set, tri-set, rest-pause e demais tecnicas.
+
+- Tri-set com composicao explicita:
+  a ficha agora lista os 3 exercicios do mesmo grupamento no texto da tecnica para eliminar ambiguidade de execucao.
+
+- Frontend ajustado para evitar duplicidade visual:
+  quando o nome do exercicio ja contem instrucao da tecnica, o selo separado de tecnica avancada nao e repetido.
 
 
 ANEXO TECNICO (RESUMO DE VALIDACOES CHAVE)

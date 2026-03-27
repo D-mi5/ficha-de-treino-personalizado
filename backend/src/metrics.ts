@@ -24,6 +24,18 @@ interface ClinicalFlags {
   comorbidade: boolean;
 }
 
+const KNEE_RISK_PATTERN = /joelho|patelo|menisc|ligament|condromalac/;
+const SHOULDER_RISK_PATTERN = /ombro|manguito/;
+const SPINE_RISK_PATTERN = /coluna|lombar|cervical|ciatic|escolios|discopat|protus|hernia/;
+
+function capTrainingDays(dias: number, maxAllowed: number, motivoReducao: string): { diasAjustados: number; motivo: string | null } {
+  const ajustado = Math.min(dias, maxAllowed);
+  return {
+    diasAjustados: ajustado,
+    motivo: ajustado < dias ? motivoReducao : null,
+  };
+}
+
 function normalizeText(text: string): string {
   return text
     .toLowerCase()
@@ -65,24 +77,17 @@ export function getIntensidade(idade: number, imc: number): Intensidade {
 function suggestIntensity(profile: ClientProfile, imc: number): Intensidade {
   const flags = getClinicalFlags(profile, imc);
 
+  // 1ª prioridade: restrições clínicas reais — sempre ganham independente do nível
   if (flags.idosa) return "leve";
   if (flags.comorbidade || flags.riscoArticular) return "leve";
   if (imc >= CLINICAL_RULES.imcObesidadeGrave) return "leve";
   if (imc >= CLINICAL_RULES.imcObesidade) return "moderada";
   if (imc < CLINICAL_RULES.imcDesnutricao) return "leve";
+
+  // 2ª prioridade: nível declara a carga base — age não pune quem já é avançada sem restrição
   if (profile.nivel === "iniciante") return "leve";
-  if (profile.idade >= CLINICAL_RULES.idadeRecuperacaoArticularMin) {
-    return profile.nivel === "avancado" ? "moderada" : "leve";
-  }
-  if (profile.idade <= CLINICAL_RULES.idadeAvancadoIntensaMax) {
-    if (profile.nivel === "intermediario") return "moderada";
-    if (profile.nivel === "avancado" && profile.idade <= CLINICAL_RULES.idadeJovemIntensaMax) return "intensa";
-    if (profile.nivel === "avancado") return "moderada";
-  }
   if (profile.nivel === "intermediario") return "moderada";
-  if (profile.nivel === "avancado") {
-    return profile.idade <= CLINICAL_RULES.idadeJovemIntensaMax ? "intensa" : "moderada";
-  }
+  if (profile.nivel === "avancado") return "intensa";
 
   return getIntensidade(profile.idade, imc);
 }
@@ -168,6 +173,11 @@ function buildClinicalContext(imc: number, profile: ClientProfile): string {
   const flags = getClinicalFlags(profile, imc);
   const notes: string[] = [];
   const focoTreino = profile.focoTreino || "nenhum";
+  const normalizedNotes = normalizeText(profile.observacoes || "");
+
+  const hasKneeRisk = KNEE_RISK_PATTERN.test(normalizedNotes);
+  const hasShoulderRisk = SHOULDER_RISK_PATTERN.test(normalizedNotes);
+  const hasSpineRisk = SPINE_RISK_PATTERN.test(normalizedNotes);
 
   if (flags.idosa) {
     notes.push("Cliente idosa. Prioridade absoluta em segurança, mobilidade, equilíbrio e prevenção de quedas.");
@@ -189,6 +199,18 @@ function buildClinicalContext(imc: number, profile: ClientProfile): string {
 
   if (flags.riscoArticular) {
     notes.push("Risco articular identificado. Evitar impacto, priorizar máquinas e execução controlada.");
+
+    if (hasKneeRisk) {
+      notes.push("Queixa em joelho detectada. Evitar amplitude dolorosa em agachamentos, leg press e afundos, priorizando progressão sem dor.");
+    }
+
+    if (hasShoulderRisk) {
+      notes.push("Queixa em ombro detectada. Evitar sobrecarga acima da cabeça e priorizar variações estáveis com pegada neutra.");
+    }
+
+    if (hasSpineRisk) {
+      notes.push("Queixa em coluna detectada. Evitar compressão axial excessiva e priorizar estabilidade lombo-pélvica com progressão conservadora.");
+    }
   }
 
   if (flags.comorbidade) {
@@ -237,43 +259,23 @@ export function adjustTrainingDays(
   const flags = getClinicalFlags(profile, imc);
 
   if (flags.idosa || imc >= CLINICAL_RULES.imcRiscoMaximo || flags.comorbidade) {
-    const ajustado = Math.min(dias, 3);
-    return {
-      diasAjustados: ajustado,
-      motivo: ajustado < dias ? "Perfil de alto risco exige menor frequência para recuperação adequada." : null,
-    };
+    return capTrainingDays(dias, 3, "Perfil de alto risco exige menor frequência para recuperação adequada.");
   }
 
   if (imc >= CLINICAL_RULES.imcObesidade) {
-    const ajustado = Math.min(dias, 4);
-    return {
-      diasAjustados: ajustado,
-      motivo: ajustado < dias ? "Obesidade exige frequência controlada para evitar sobrecarga articular." : null,
-    };
+    return capTrainingDays(dias, 4, "Obesidade exige frequência controlada para evitar sobrecarga articular.");
   }
 
   if (flags.riscoArticular) {
-    const ajustado = Math.min(dias, 4);
-    return {
-      diasAjustados: ajustado,
-      motivo: ajustado < dias ? "Dor ou risco articular exige melhor distribuição de recuperação entre os treinos." : null,
-    };
+    return capTrainingDays(dias, 4, "Dor ou risco articular exige melhor distribuição de recuperação entre os treinos.");
   }
 
   if (profile.nivel === "iniciante") {
-    const ajustado = Math.min(dias, 4);
-    return {
-      diasAjustados: ajustado,
-      motivo: ajustado < dias ? "Nível iniciante exige período maior de recuperação entre os treinos." : null,
-    };
+    return capTrainingDays(dias, 4, "Nível iniciante exige período maior de recuperação entre os treinos.");
   }
 
   if (imc < CLINICAL_RULES.imcDesnutricao) {
-    const ajustado = Math.min(dias, 4);
-    return {
-      diasAjustados: ajustado,
-      motivo: ajustado < dias ? "Baixo peso pede frequência moderada para preservar recuperação e favorecer ganho de massa." : null,
-    };
+    return capTrainingDays(dias, 4, "Baixo peso pede frequência moderada para preservar recuperação e favorecer ganho de massa.");
   }
 
   return { diasAjustados: dias, motivo: null };
@@ -296,6 +298,7 @@ function resolveRiskLevel(profile: ClientProfile, imc: number): NivelRisco {
 function buildEssentialComments(profile: ClientProfile, imc: number, intensidade: Intensidade, daysAdjustmentReason: string | null): string[] {
   const flags = getClinicalFlags(profile, imc);
   const comments: string[] = [];
+  const normalizedNotes = normalizeText(profile.observacoes || "");
 
   if (daysAdjustmentReason) {
     comments.push(daysAdjustmentReason);
@@ -307,6 +310,18 @@ function buildEssentialComments(profile: ClientProfile, imc: number, intensidade
 
   if (flags.riscoArticular) {
     comments.push("Evite impacto nas articulações sensíveis e prefira execução controlada, com amplitude segura.");
+
+    if (KNEE_RISK_PATTERN.test(normalizedNotes)) {
+      comments.push("No joelho, evite amplitude dolorosa e evolua carga apenas com execução estável e sem dor.");
+    }
+
+    if (SHOULDER_RISK_PATTERN.test(normalizedNotes)) {
+      comments.push("No ombro, priorize pegadas neutras e evite sobrecarga acima da cabeça em fases dolorosas.");
+    }
+
+    if (SPINE_RISK_PATTERN.test(normalizedNotes)) {
+      comments.push("Na coluna, evite compressão excessiva e mantenha foco em estabilidade do core e técnica limpa.");
+    }
   }
 
   if (flags.idosa) {

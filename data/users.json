@@ -1,0 +1,20 @@
+[
+  [
+    "deyne@gmail.com",
+    {
+      "id": "user-2bcf549a-0d12-46e4-8c59-b2def7e39fb9",
+      "email": "deyne@gmail.com",
+      "passwordHash": "scrypt$e240c9cb2550c90d379e0e5d81138bac$81d794baadbc61e93aeea748c82cd1c589489de9e020044ef804729bdc68ca9eca7ac1ca8b2b5af3288fd7a74c86c15127913014c42fbd20647ec0f14962958c",
+      "createdAt": "2026-03-27T17:17:02.612Z"
+    }
+  ],
+  [
+    "thais@gmail.com",
+    {
+      "id": "user-b89fadb0-dbb7-4f21-852f-7489914558d6",
+      "email": "thais@gmail.com",
+      "passwordHash": "scrypt$32aa3d746576101efe494ac5f526eea8$f09e9fa32ba735f471e56b3ed9043ed4c521739224da6410b40bb11505f1bfef0401b934882fd7ee66f760c63f6f27057c307285a04228d310364176f6f950c6",
+      "createdAt": "2026-03-27T17:18:14.470Z"
+    }
+  ]
+]

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const objetivoSchema = z.enum(["emagrecimento", "hipertrofia", "definicao"]);
+const nivelSchema = z.enum(["iniciante", "intermediario", "avancado"]);
+const periodicidadeSchema = z.enum(["semanal", "quinzenal", "mensal"]);
+const intensidadeSchema = z.enum(["leve", "moderada", "intensa"]);
+const nivelRiscoSchema = z.enum(["baixo", "moderado", "alto"]);
+const cargaSchema = z.enum(["leve", "moderada", "alta"]);
 const focoTreinoSchema = z.enum(["nenhum", "quadriceps", "gluteo", "posteriores", "costas", "peito"]);
 
 const profileSchemaBase = z.object({
@@ -7,11 +13,11 @@ const profileSchemaBase = z.object({
   idade: z.number().int().min(14).max(85),
   peso: z.number().min(35).max(250),
   altura: z.number().min(1.3).max(2.2),
-  objetivo: z.enum(["emagrecimento", "hipertrofia", "definicao"]),
-  nivel: z.enum(["iniciante", "intermediario", "avancado"]),
+  objetivo: objetivoSchema,
+  nivel: nivelSchema,
   focoTreino: focoTreinoSchema.optional().default("nenhum"),
   diasSemana: z.number().int().min(2).max(7),
-  periodicidade: z.enum(["semanal", "quinzenal", "mensal"]).optional().default("semanal"),
+  periodicidade: periodicidadeSchema.optional().default("semanal"),
   observacoes: z.string().max(400).optional(),
 });
 
@@ -28,23 +34,34 @@ export const profileSchema = profileSchemaBase.superRefine((data, ctx) => {
 export const workoutAnalysisSchema = z.object({
   imc: z.number().min(10).max(80),
   classificacaoImc: z.string().min(1).max(120),
-  intensidadeSugerida: z.enum(["leve", "moderada", "intensa"]),
+  intensidadeSugerida: intensidadeSchema,
   progressaoSemanal: z.string().min(1).max(500),
   contextoClinico: z.string().max(1000),
   mensagemAjuste: z.string().max(1000).nullable(),
-  objetivoFinal: z.enum(["emagrecimento", "hipertrofia", "definicao"]),
+  objetivoFinal: objetivoSchema,
   diasTreinoAjustados: z.number().int().min(1).max(7),
   motivoAjusteDiasTreino: z.string().max(500).nullable(),
-  nivelRisco: z.enum(["baixo", "moderado", "alto"]),
+  nivelRisco: nivelRiscoSchema,
   comentariosEssenciais: z.array(z.string().min(1).max(240)).max(6),
 });
+
+const tecnicaAvancadaSchema = z.enum([
+  "superserie",
+  "bi-set",
+  "tri-set",
+  "rest-pause",
+  "drop-set",
+  "piramide",
+  "serie combinada",
+]);
 
 const exercicioSchema = z.object({
   nome: z.string().min(1),
   series: z.number().min(1).max(6),
   repeticoes: z.string().min(1),
-  carga: z.enum(["leve", "moderada", "alta"]),
+  carga: cargaSchema,
   grupoMuscular: z.string().min(1),
+  tecnicaAvancada: tecnicaAvancadaSchema.optional(),
 });
 
 const treinoSchema = z.object({
@@ -70,23 +87,32 @@ export const workoutPlanSchema = z.object({
   observacoesFinais: z.string().min(1),
 });
 
+const generationMetaSchema = z.object({
+  source: z.enum(["ai", "fallback-local"]),
+  provider: z.enum(["openai", "gemini"]).optional(),
+  model: z.string().min(1).max(100).optional(),
+  attempts: z.number().int().min(1).max(10).optional(),
+  fallbackReason: z.enum(["provider-unavailable", "timeout", "invalid-output", "missing-credentials", "unknown"]).optional(),
+});
+
 export const workoutResponseSchema = z.object({
   workoutPlan: workoutPlanSchema,
   analysis: workoutAnalysisSchema,
+  generationMeta: generationMetaSchema.optional(),
 });
 
 // Histórico pode conter entradas antigas sem todos os novos campos analíticos.
 const historyWorkoutAnalysisSchema = z.object({
   imc: z.number().min(10).max(80),
   classificacaoImc: z.string().min(1).max(120),
-  intensidadeSugerida: z.enum(["leve", "moderada", "intensa"]),
+  intensidadeSugerida: intensidadeSchema,
   progressaoSemanal: z.string().min(1).max(500),
   contextoClinico: z.string().max(1000).optional(),
   mensagemAjuste: z.string().max(1000).nullable().optional(),
-  objetivoFinal: z.enum(["emagrecimento", "hipertrofia", "definicao"]).optional(),
+  objetivoFinal: objetivoSchema.optional(),
   diasTreinoAjustados: z.number().int().min(1).max(7).optional(),
   motivoAjusteDiasTreino: z.string().max(500).nullable().optional(),
-  nivelRisco: z.enum(["baixo", "moderado", "alto"]).optional(),
+  nivelRisco: nivelRiscoSchema.optional(),
   comentariosEssenciais: z.array(z.string().min(1).max(240)).max(6).optional(),
 });
 

@@ -28,23 +28,29 @@
   <rect x="948" y="118" width="172" height="54" rx="18" fill="url(#rose)"/>
   <text x="985" y="152" fill="#FFF4F6" font-family="Arial, sans-serif" font-size="20" font-weight="700">Plano pronto</text>
 
-  <rect x="110" y="234" width="510" height="208" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+  <rect x="110" y="234" width="510" height="236" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
   <text x="146" y="282" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">DADOS DA CLIENTE</text>
   <text x="146" y="326" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22">Nome: Cliente Exemplo</text>
   <text x="146" y="362" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Idade: 31 anos</text>
   <text x="146" y="396" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Peso: 67 kg | Altura: 1,64 m</text>
-  <text x="146" y="430" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Objetivo: Definição com foco em glúteos e posterior</text>
+  <text x="146" y="430" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Objetivo: Definição com foco em glúteos</text>
 
-  <rect x="650" y="234" width="520" height="208" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+  <rect x="650" y="234" width="520" height="236" rx="26" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
   <text x="686" y="282" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">ANÁLISE INICIAL</text>
   <text x="686" y="326" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="22">IMC: 24,9 (peso adequado)</text>
   <text x="686" y="362" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Intensidade sugerida: moderada</text>
   <text x="686" y="396" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Progressão: aumentar 3% a 5% por semana</text>
-  <text x="686" y="430" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="21">Observação: manter técnica limpa e descanso controlado</text>
+  <text x="686" y="420" fill="#D8E2F1" font-family="Arial, sans-serif" font-size="19">
+    <tspan x="686" dy="0">Observação: manter técnica limpa</tspan>
+    <tspan x="686" dy="24">e descanso controlado</tspan>
+  </text>
 
   <rect x="110" y="478" width="1060" height="112" rx="24" fill="#0F1F3D" stroke="#23395D"/>
   <text x="146" y="522" fill="#F7C9D2" font-family="Arial, sans-serif" font-size="18" font-weight="700">ESTRUTURA SEMANAL</text>
-  <text x="146" y="560" fill="#E6EEF8" font-family="Arial, sans-serif" font-size="22">Segunda: Treino A | Terça: Cardio leve + abdômen | Quarta: Treino B | Quinta: descanso | Sexta: Treino C | Sábado: Treino D</text>
+  <text x="146" y="546" fill="#E6EEF8" font-family="Arial, sans-serif" font-size="20">
+    <tspan x="146" dy="0">Segunda: Treino A | Terça: Cardio leve + abdômen | Quarta: Treino B</tspan>
+    <tspan x="146" dy="28">Quinta: descanso | Sexta: Treino C | Sábado: Treino D</tspan>
+  </text>
 
   <g>
     <rect x="110" y="628" width="510" height="278" rx="24" fill="#102244" stroke="#27436A"/>
@@ -97,5 +103,5 @@
   <text x="146" y="1602" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Plano coerente com objetivo e frequência semanal</text>
   <text x="146" y="1640" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Organização clara por blocos de treino</text>
   <text x="146" y="1678" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Linguagem simples e profissional</text>
-  <text x="146" y="1716" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Estrutura próxima do resultado real esperado na página final</text>
+  <text x="146" y="1716" fill="#DCE7F6" font-family="Arial, sans-serif" font-size="22">• Estrutura próxima do resultado esperado na página final</text>
 </svg>

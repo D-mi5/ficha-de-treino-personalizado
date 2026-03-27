@@ -7,6 +7,9 @@ interface JsonObject {
 }
 
 const SENSITIVE_KEY_PATTERN = /(password|passwd|token|authorization|cookie|api[-_]?key|secret|session)/i;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const STRING_LOG_LIMIT = 800;
+const ARRAY_LOG_LIMIT = 50;
 
 function toSafeString(value: unknown): string {
   if (typeof value === "string") {
@@ -40,8 +43,7 @@ function maskString(raw: string): string {
     return "***";
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (emailPattern.test(raw)) {
+  if (EMAIL_PATTERN.test(raw)) {
     return maskEmail(raw);
   }
 
@@ -58,7 +60,7 @@ function sanitizeValue(value: unknown): JsonValue {
   }
 
   if (typeof value === "string") {
-    return value.length > 800 ? `${value.slice(0, 800)}...` : value;
+    return value.length > STRING_LOG_LIMIT ? `${value.slice(0, STRING_LOG_LIMIT)}...` : value;
   }
 
   if (typeof value === "number" || typeof value === "boolean") {
@@ -66,7 +68,7 @@ function sanitizeValue(value: unknown): JsonValue {
   }
 
   if (Array.isArray(value)) {
-    return value.slice(0, 50).map((item) => sanitizeValue(item));
+    return value.slice(0, ARRAY_LOG_LIMIT).map((item) => sanitizeValue(item));
   }
 
   if (typeof value === "object") {
