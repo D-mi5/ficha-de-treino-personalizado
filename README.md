@@ -1,8 +1,8 @@
 # Gerador de Ficha de Treino Feminino
 
-[![Preview do projeto](frontend/assets/images/ficha-exemplo.svg)](frontend/assets/images/preview.gif.mp4)
+[![Preview do projeto](frontend/assets/images/preview-no-wait.gif)](frontend/assets/images/preview-no-wait.gif)
 
-[Abrir video de preview](frontend/assets/images/preview.gif.mp4)
+[Abrir GIF de preview](frontend/assets/images/preview-no-wait.gif)
 [![CI](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml/badge.svg)](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/coverage-vitest%20v8-blue)
 
