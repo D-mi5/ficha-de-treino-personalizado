@@ -1,7 +1,7 @@
 # Gerador de Ficha de Treino Feminino
 
-Versao da documentacao: 1.1.0  
-Ultima atualizacao: 2026-03-27
+
+![Preview do projeto](./preview.gif)
 
 [![CI](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml/badge.svg)](https://github.com/D-mi5/ficha-de-treino-personalizado/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/coverage-vitest%20v8-blue)
