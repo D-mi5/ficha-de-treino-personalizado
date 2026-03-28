@@ -55,6 +55,13 @@ const EXERCISE_LIBRARY: Record<string, WorkoutTemplate[]> = {
     { nome: "Elevação lateral", grupoMuscular: "ombros" },
     { nome: "Elevação frontal", grupoMuscular: "ombros" },
   ],
+  bracos: [
+    { nome: "Rosca direta", grupoMuscular: "biceps" },
+    { nome: "Rosca alternada", grupoMuscular: "biceps" },
+    { nome: "Rosca martelo", grupoMuscular: "biceps" },
+    { nome: "Tríceps na polia", grupoMuscular: "triceps" },
+    { nome: "Tríceps testa", grupoMuscular: "triceps" },
+  ],
   core: [
     { nome: "Prancha", grupoMuscular: "abdomen" },
     { nome: "Abdominal infra", grupoMuscular: "abdomen" },
@@ -78,6 +85,7 @@ const CONSERVATIVE_EXERCISE_NAMES: Partial<Record<string, string[]>> = {
   costas: ["Puxada na frente", "Remada baixa", "Pulldown na polia", "Face pull"],
   peito: ["Supino máquina", "Crucifixo máquina", "Peck deck"],
   ombros: ["Elevação lateral"],
+  bracos: ["Rosca direta", "Rosca alternada", "Rosca martelo", "Tríceps na polia", "Tríceps testa"],
   cardio: ["Caminhada inclinada", "Bicicleta ergométrica", "Elíptico moderado"],
 };
 
@@ -129,6 +137,7 @@ function applyRegionalRestrictions(group: string, templates: WorkoutTemplate[], 
     }
     if (group === "peito") {
       bannedByGroup.add("Supino com halteres");
+      bannedByGroup.add("Crucifixo máquina");
     }
   }
 
@@ -136,6 +145,7 @@ function applyRegionalRestrictions(group: string, templates: WorkoutTemplate[], 
     if (group === "quadriceps") {
       bannedByGroup.add("Afundo no smith");
       bannedByGroup.add("Hack machine");
+      bannedByGroup.add("Agachamento guiado");
     }
     if (group === "gluteo") {
       bannedByGroup.add("Passada com halteres");
@@ -176,6 +186,28 @@ function getCarga(profile: ClientProfile, analysis: WorkoutAnalysis): WorkoutLoa
   return "leve";
 }
 
+function reduceLoad(load: WorkoutLoad): WorkoutLoad {
+  if (load === "alta") return "moderada";
+  if (load === "moderada") return "leve";
+  return "leve";
+}
+
+function adjustLoadForSpecificRisk(exerciseName: string, baseLoad: WorkoutLoad, risks: RegionalRiskFlags): WorkoutLoad {
+  if (risks.coluna && /agachamento guiado|leg press|stiff|levantamento romeno|remada unilateral/i.test(exerciseName)) {
+    return reduceLoad(baseLoad);
+  }
+
+  if (risks.ombro && /supino|crucifixo|desenvolvimento|elevacao lateral|elevação lateral/i.test(exerciseName)) {
+    return reduceLoad(baseLoad);
+  }
+
+  if (risks.joelho && /leg press|agachamento guiado|hack machine|afundo/i.test(exerciseName)) {
+    return reduceLoad(baseLoad);
+  }
+
+  return baseLoad;
+}
+
 function shouldUseConservativeExerciseSelection(profile: ClientProfile, analysis: WorkoutAnalysis): boolean {
   return profile.nivel === "iniciante"
     || analysis.nivelRisco !== "baixo"
@@ -213,11 +245,39 @@ function adaptExerciseNameForRisk(exerciseName: string, risks: RegionalRiskFlags
     return `${exerciseName} (amplitude confortavel e sem dor)`;
   }
 
+  if (risks.joelho && (exerciseName === "Leg press" || exerciseName === "Agachamento guiado")) {
+    return `${exerciseName} (amplitude curta, controle excêntrico e sem dor)`;
+  }
+
+  if (risks.ombro && exerciseName === "Supino máquina") {
+    return "Supino máquina (pegada neutra e amplitude sem dor)";
+  }
+
+  if (risks.ombro && exerciseName === "Elevação lateral") {
+    return "Elevação lateral (amplitude parcial e controle escapular)";
+  }
+
   if (risks.coluna && exerciseName === "Prancha") {
     return "Prancha modificada (apoio de joelhos se necessario)";
   }
 
   return exerciseName;
+}
+
+function resolvePrimaryBlockTechnique(focusNormalized: string): "tri-set" | "bi-set" {
+  // Alterna mensalmente para variar estímulo entre fichas de meses consecutivos.
+  const evenMonth = new Date().getMonth() % 2 === 0;
+
+  if (focusNormalized === "gluteo") {
+    // Para glúteos, priorizar bi-set deixa a execução mais fluida e reduz repetição textual em descrições.
+    return "bi-set";
+  }
+
+  if (focusNormalized === "posteriores") {
+    return evenMonth ? "bi-set" : "tri-set";
+  }
+
+  return evenMonth ? "tri-set" : "bi-set";
 }
 
 function assignTecnicas(
@@ -250,23 +310,30 @@ function assignTecnicas(
 
   // Intermediária com foco: aplicar 2 técnicas apenas no grupamento foco.
   if (profile.nivel === "intermediario") {
-    const techniques: Array<"bi-set" | "tri-set"> = ["bi-set", "tri-set"];
+    // Para evitar repetição de exercícios entre técnicas, usar apenas UMA técnica de bloco por treino.
+    const primaryTechnique = resolvePrimaryBlockTechnique(focusNormalized);
     return exercises.map((exercise, idx) => {
       const techPosition = focusIndexes.indexOf(idx);
-      if (techPosition === 0) return { ...exercise, tecnicaAvancada: techniques[0] };
-      if (techPosition === 1) return { ...exercise, tecnicaAvancada: techniques[1] };
+      if (techPosition === 0) return { ...exercise, tecnicaAvancada: primaryTechnique };
       return exercise;
     });
   }
 
   // Avançada com foco: aplicar até 3 técnicas apenas no grupamento foco.
   if (profile.nivel === "avancado" && analysis.intensidadeSugerida === "intensa") {
-    const techniques: Array<"bi-set" | "tri-set" | "rest-pause"> = ["bi-set", "tri-set", "rest-pause"];
+    // Regra prática: escolher um bloco (tri-set OU bi-set) + rest-pause para não repetir combinação de exercícios.
+    const primaryTechnique = resolvePrimaryBlockTechnique(focusNormalized);
     return exercises.map((exercise, idx) => {
       const techPosition = focusIndexes.indexOf(idx);
-      if (techPosition === 0) return { ...exercise, tecnicaAvancada: techniques[0] };
-      if (techPosition === 1) return { ...exercise, tecnicaAvancada: techniques[1] };
-      if (techPosition === 2) return { ...exercise, tecnicaAvancada: techniques[2] };
+      if (techPosition === 0) return { ...exercise, tecnicaAvancada: primaryTechnique };
+
+      // Evita sobreposição: se a técnica principal for tri-set, os 3 primeiros exercícios do foco
+      // já pertencem ao mesmo bloco. Nesse caso, não aplicar rest-pause neles.
+      if (primaryTechnique === "tri-set") {
+        return exercise;
+      }
+
+      if (techPosition === 1) return { ...exercise, tecnicaAvancada: "rest-pause" };
       return exercise;
     });
   }
@@ -347,29 +414,46 @@ function toExercises(
 ): WorkoutExercise[] {
   const series = getSeries(profile, analysis);
   const repeticoes = getRepeticoes(profile, analysis);
-  const carga = getCarga(profile, analysis);
+  const baseCarga = getCarga(profile, analysis);
   const risks = detectRegionalRisks(profile);
 
   const base = dedupeTemplates(templates)
     .slice(0, 6)
-    .map((item) => ({
-      nome: adaptExerciseNameForRisk(item.nome, risks),
+    .map((item) => {
+      const adaptedName = adaptExerciseNameForRisk(item.nome, risks);
+
+      return {
+      nome: adaptedName,
       series,
-      repeticoes,
-      carga,
+      repeticoes: item.nome.toLowerCase().includes("prancha")
+        ? "30 a 45 segundos"
+        : item.grupoMuscular === "cardiorrespiratorio"
+          ? "15 a 25 minutos"
+          : repeticoes,
+      carga: adjustLoadForSpecificRisk(adaptedName, baseCarga, risks),
       grupoMuscular: item.grupoMuscular,
-    }));
+    };
+    });
 
   const withTechniques = assignTecnicas(base, profile, analysis, isEmphasisDay);
   return appendTechniqueGuidance(withTechniques);
 }
 
+function normalizeFocusValue(value: string | undefined): string {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "";
+  if (normalized === "costa") return "costas";
+  return normalized;
+}
+
 function getFocusGroup(profile: ClientProfile): string | null {
-  if (!profile.focoTreino || profile.focoTreino === "nenhum") {
+  const focus = normalizeFocusValue(profile.focoTreino);
+
+  if (!focus || focus === "nenhum") {
     return null;
   }
 
-  return profile.focoTreino;
+  return focus;
 }
 
 function buildWorkoutTemplates(days: number, profile: ClientProfile, analysis: WorkoutAnalysis): Array<{ dia: string; nome: string; grupos: string[] }> {
@@ -377,63 +461,157 @@ function buildWorkoutTemplates(days: number, profile: ClientProfile, analysis: W
 
   if (days <= 2) {
     return [
-      { dia: "A", nome: focus === "gluteo" ? "Inferiores com ênfase em glúteos" : "Inferiores completos", grupos: [focus || "quadriceps", "posteriores", "gluteo", "panturrilhas"] },
-      { dia: "B", nome: "Superiores completos", grupos: [focus === "costas" || focus === "peito" ? focus : "costas", "peito", "ombros", "core"] },
+      { dia: "A", nome: "Inferiores completos 1", grupos: ["quadriceps", "posteriores", "gluteo", "panturrilhas"] },
+      { dia: "B", nome: "Inferiores completos 2", grupos: ["quadriceps", "posteriores", "gluteo", "panturrilhas"] },
     ];
   }
 
   if (days === 3) {
     return [
-      { dia: "A", nome: focus === "quadriceps" ? "Quadríceps e glúteos" : focus === "gluteo" ? "Glúteos e quadríceps" : "Inferiores 1", grupos: [focus || "quadriceps", "gluteo", "panturrilhas"] },
-      { dia: "B", nome: "Superiores estratégicos", grupos: [focus === "costas" || focus === "peito" ? focus : "costas", "peito", "ombros"] },
-      { dia: "C", nome: focus === "posteriores" ? "Posteriores e core" : "Inferiores 2 e core", grupos: [focus === "posteriores" ? "posteriores" : "posteriores", "gluteo", "core", analysis.objetivoFinal === "emagrecimento" ? "cardio" : "core"] },
+      { dia: "A", nome: focus === "quadriceps" ? "Quadríceps prioritários" : "Quadríceps e panturrilhas", grupos: [focus === "quadriceps" ? focus : "quadriceps", "panturrilhas"] },
+      { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : focus === "peito" ? "Peito prioritário" : "Superiores completo", grupos: [focus === "costas" || focus === "peito" ? focus : "costas", "peito", "ombros", "core"] },
+      { dia: "C", nome: focus === "gluteo" ? "Glúteos prioritários" : focus === "posteriores" ? "Posteriores prioritários" : "Glúteos e posteriores", grupos: [focus === "gluteo" ? "gluteo" : focus === "posteriores" ? "posteriores" : "gluteo", "posteriores"] },
     ];
   }
 
   if (days === 4) {
-    // Treino A = só parte anterior (quadriceps + panturrilhas)
-    // Treino C = parte posterior (posteriores + glúteos)
-    // Exceção: foco em glúteos → glúteos ficam prioritários no Treino A
-    const dayAGrupos = focus === "gluteo"
-      ? ["gluteo", "quadriceps", "panturrilhas"]
-      : focus === "costas" || focus === "peito"
-        ? ["quadriceps", "panturrilhas"]
-        : [focus || "quadriceps", "panturrilhas"];
     return [
-      { dia: "A", nome: focus === "gluteo" ? "Glúteos prioritários" : focus === "quadriceps" ? "Quadríceps prioritários" : "Inferiores anteriores", grupos: dayAGrupos },
-      { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : focus === "peito" ? "Peito prioritário" : "Superiores 1", grupos: [focus === "costas" || focus === "peito" ? focus : "costas", "ombros", "core"] },
-      { dia: "C", nome: "Posteriores e glúteos", grupos: ["posteriores", "gluteo", analysis.objetivoFinal === "emagrecimento" ? "cardio" : "core"] },
-      { dia: "D", nome: "Superiores 2 e acabamento", grupos: ["costas", "peito", "ombros", "core"] },
+      { dia: "A", nome: focus === "quadriceps" ? "Quadríceps prioritários" : "Quadríceps e panturrilhas", grupos: [focus === "quadriceps" ? focus : "quadriceps", "panturrilhas"] },
+      { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : "Costas e abdômen", grupos: [focus === "costas" ? focus : "costas", "core"] },
+      { dia: "C", nome: focus === "gluteo" ? "Glúteos prioritários" : "Glúteos e posteriores", grupos: [focus === "gluteo" ? "gluteo" : "gluteo", "posteriores"] },
+      { dia: "D", nome: focus === "peito" ? "Peito prioritário" : "Peito e ombros", grupos: [focus === "peito" ? focus : "peito", "ombros", "cardio"] },
     ];
   }
 
-  // 5 dias: anterior e posterior bem separados, glúteos só no Treino C
-  const day5AGrupos = focus === "gluteo"
-    ? ["gluteo", "quadriceps", "panturrilhas"]
-    : [focus === "costas" || focus === "peito" ? "quadriceps" : focus || "quadriceps", "panturrilhas"];
+  if (days === 5) {
+    // 5 dias: quadríceps, costas, glúteos, peito+ombros, posteriores — todos separados
+    return [
+      { dia: "A", nome: focus === "quadriceps" ? "Quadríceps prioritários" : "Quadríceps e panturrilhas", grupos: [focus === "quadriceps" ? focus : "quadriceps", "panturrilhas"] },
+      { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : "Costas e abdômen", grupos: [focus === "costas" ? focus : "costas", "core"] },
+      { dia: "C", nome: focus === "gluteo" ? "Glúteos prioritários" : "Glúteos e panturrilhas", grupos: [focus === "gluteo" ? "gluteo" : "gluteo", "panturrilhas"] },
+      { dia: "D", nome: focus === "peito" ? "Peito prioritário" : "Peito e ombros", grupos: [focus === "peito" ? focus : "peito", "ombros", "cardio"] },
+      { dia: "E", nome: focus === "posteriores" ? "Posteriores prioritários" : "Posteriores e panturrilhas", grupos: [focus === "posteriores" ? focus : "posteriores", "panturrilhas"] },
+    ];
+  }
+
+  // 6 dias: avançado com grupamentos separados e dia de braços
   return [
-    { dia: "A", nome: focus === "gluteo" ? "Glúteos prioritários" : focus === "quadriceps" ? "Quadríceps prioritários" : "Inferiores anteriores", grupos: day5AGrupos },
-    { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : focus === "peito" ? "Peito prioritário" : "Superiores 1", grupos: [focus === "costas" || focus === "peito" ? focus : "costas", "peito", "ombros"] },
-    { dia: "C", nome: "Posteriores e glúteos", grupos: ["posteriores", "gluteo", "core"] },
-    { dia: "D", nome: "Superiores 2", grupos: ["costas", "peito", "ombros", "core"] },
-    { dia: "E", nome: analysis.objetivoFinal === "emagrecimento" ? "Condicionamento e core" : "Acabamento e estabilidade", grupos: [analysis.objetivoFinal === "emagrecimento" ? "cardio" : "core", "panturrilhas"] },
-  ].slice(0, days);
+    { dia: "A", nome: focus === "quadriceps" ? "Quadríceps prioritários" : "Quadríceps e panturrilhas", grupos: [focus === "quadriceps" ? focus : "quadriceps", "panturrilhas"] },
+    { dia: "B", nome: focus === "costas" ? "Costas prioritárias" : "Costas e abdômen", grupos: [focus === "costas" ? focus : "costas", "core"] },
+    { dia: "C", nome: focus === "gluteo" ? "Glúteos prioritários" : "Glúteos e panturrilhas", grupos: [focus === "gluteo" ? "gluteo" : "gluteo", "panturrilhas"] },
+    { dia: "D", nome: focus === "peito" ? "Peito prioritário" : "Peito e ombros", grupos: [focus === "peito" ? focus : "peito", "ombros", "cardio"] },
+    { dia: "E", nome: focus === "posteriores" ? "Posteriores prioritários" : "Posteriores e panturrilhas", grupos: [focus === "posteriores" ? focus : "posteriores", "panturrilhas"] },
+    { dia: "F", nome: "Braços e abdômen", grupos: ["bracos", "core"] },
+  ];
 }
 
 function buildWorkoutBlocks(profile: ClientProfile, analysis: WorkoutAnalysis): WorkoutBlock[] {
-  const adjustedDays = clamp(analysis.diasTreinoAjustados || profile.diasSemana, 2, 5);
+  const adjustedDays = clamp(analysis.diasTreinoAjustados || profile.diasSemana, 2, 6);
   const templates = buildWorkoutTemplates(adjustedDays, profile, analysis);
   const focus = getFocusGroup(profile);
-  const emphasisIndex = focus
-    ? templates.findIndex((template) => template.grupos.includes(focus))
-    : -1;
+  const orderedTemplates = [...templates];
+  if (focus) {
+    const currentIndex = orderedTemplates.findIndex((template) => template.grupos.includes(focus));
+    if (currentIndex > 0) {
+      const [focusTemplate] = orderedTemplates.splice(currentIndex, 1);
+      orderedTemplates.unshift(focusTemplate);
+    }
+  }
 
-  return templates.map((template, idx) => {
-    const exercises = template.grupos.flatMap((group) => selectTemplatesForGroup(group, profile, analysis)).slice(0, 7);
+  const emphasisIndex = focus
+    ? orderedTemplates.findIndex((template) => template.grupos.includes(focus))
+    : -1;
+  const usedExerciseNames = new Set<string>();
+
+  return orderedTemplates.map((template, idx) => {
+    const selectedTemplates: WorkoutTemplate[] = [];
+
+    for (const group of template.grupos) {
+      const groupTemplates = selectTemplatesForGroup(group, profile, analysis);
+      const uniqueForWeek = groupTemplates.filter((item) => !usedExerciseNames.has(item.nome));
+      const source = uniqueForWeek.length > 0 ? uniqueForWeek : groupTemplates;
+
+      for (const item of source) {
+        if (selectedTemplates.length >= 7) {
+          break;
+        }
+
+        if (selectedTemplates.some((selected) => selected.nome === item.nome)) {
+          continue;
+        }
+
+        // Repetição semanal só entra como último recurso quando não há opções inéditas.
+        if (usedExerciseNames.has(item.nome) && uniqueForWeek.length > 0) {
+          continue;
+        }
+
+        selectedTemplates.push(item);
+      }
+
+      if (selectedTemplates.length >= 7) {
+        break;
+      }
+    }
+
+    if (selectedTemplates.length < 3) {
+      for (const group of template.grupos) {
+        const groupTemplates = selectTemplatesForGroup(group, profile, analysis);
+
+        for (const item of groupTemplates) {
+          if (selectedTemplates.length >= 3) {
+            break;
+          }
+
+          if (selectedTemplates.some((selected) => selected.nome === item.nome)) {
+            continue;
+          }
+
+          selectedTemplates.push(item);
+        }
+
+        if (selectedTemplates.length >= 3) {
+          break;
+        }
+      }
+    }
+
     // Treino de ênfase = primeiro treino da semana que contém o grupo foco.
     const isEmphasisDay = emphasisIndex >= 0 && idx === emphasisIndex;
+    let exercises = selectedTemplates;
+
+    if (isEmphasisDay && focus) {
+      const focusGroupMuscular = focus === "gluteo" ? "gluteos" : focus;
+      const emphasisExercises = selectedTemplates.filter((item) => item.grupoMuscular === focusGroupMuscular);
+      const focusPool = selectTemplatesForGroup(focus, profile, analysis)
+        .filter((item) => !emphasisExercises.some((selected) => selected.nome === item.nome));
+
+      while (emphasisExercises.length < 6 && focusPool.length > 0) {
+        const next = focusPool.shift();
+        if (!next) break;
+        emphasisExercises.push(next);
+      }
+
+      const lowerBodyFocus = new Set(["quadriceps", "posteriores", "gluteo"]);
+      if (lowerBodyFocus.has(focus)) {
+        const calfPool = selectTemplatesForGroup("panturrilhas", profile, analysis)
+          .filter((item) => !emphasisExercises.some((selected) => selected.nome === item.nome));
+
+        while (emphasisExercises.length < 5 && calfPool.length > 0) {
+          const nextCalf = calfPool.shift();
+          if (!nextCalf) break;
+          emphasisExercises.push(nextCalf);
+        }
+      }
+
+      if (emphasisExercises.length >= 3) {
+        exercises = emphasisExercises.slice(0, 6);
+      }
+    }
+
+    exercises.forEach((item) => usedExerciseNames.add(item.nome));
+
     return {
-      dia: template.dia,
+      dia: String.fromCharCode(65 + idx),
       nome: template.nome,
       exercicios: toExercises(exercises, profile, analysis, isEmphasisDay),
     };
@@ -451,6 +629,14 @@ function buildSubstituicoes(profile: ClientProfile, analysis: WorkoutAnalysis): 
     "Se a elevação pélvica estiver desconfortável, trocar por glute bridge com pausa de 2 segundos no topo.",
     "Se houver desconforto lombar em exercícios livres, priorizar máquina ou apoio guiado.",
   ];
+
+  if (risks.ombro) {
+    substitutions.unshift("Se houver dor no ombro, evitar movimentos acima da cabeça e substituir por máquinas guiadas com pegada neutra e amplitude sem dor.");
+  }
+
+  if (risks.joelho) {
+    substitutions.unshift("Se houver dor no joelho, reduzir amplitude em leg press/agachamentos e priorizar cadeira extensora/flexora com controle de movimento.");
+  }
 
   if (risks.coluna) {
     substitutions.unshift("Se houver dor ativa na coluna no dia, trocar agachamento guiado e leg press por cadeira extensora, mesa/cadeira flexora e glute bridge com amplitude indolor.");
@@ -516,15 +702,21 @@ function buildCards(profile: ClientProfile, analysis: WorkoutAnalysis) {
 }
 
 function buildCycleText(profile: ClientProfile, analysis: WorkoutAnalysis): string {
+  const levelGuidance = profile.nivel === "intermediario"
+    ? "Para nível intermediário, iniciar em carga moderada e evoluir para moderada-alta nas semanas 2 e 3 quando houver execução limpa e recuperação adequada."
+    : profile.nivel === "avancado"
+      ? "Para nível avançado, manter estímulo pesado desde a semana 1 e evoluir carga com técnicas avançadas quando clinicamente permitido."
+      : "Para nível iniciante, priorizar adaptação técnica, mobilidade e consistência sem técnicas avançadas.";
+
   if (profile.periodicidade === "mensal") {
-    return `Ciclo mensal com progressão simples por 4 semanas. Semana 1 com adaptação técnica, semanas 2 e 3 com aumento gradual de carga, e semana 4 consolidando execução com controle de fadiga. ${analysis.progressaoSemanal}`;
+    return `Ciclo mensal com progressão simples por 4 semanas. Semana 1 com adaptação técnica, semanas 2 e 3 com aumento gradual de carga, e semana 4 consolidando execução com controle de fadiga. ${levelGuidance} ${analysis.progressaoSemanal}`;
   }
 
   if (profile.periodicidade === "quinzenal") {
-    return `Ciclo quinzenal com execução estável na primeira semana e progressão leve de carga ou repetições na segunda semana, respeitando recuperação e segurança. ${analysis.progressaoSemanal}`;
+    return `Ciclo quinzenal com execução estável na primeira semana e progressão leve de carga ou repetições na segunda semana, respeitando recuperação e segurança. ${levelGuidance} ${analysis.progressaoSemanal}`;
   }
 
-  return `Ciclo semanal objetivo para execução imediata, com foco em consistência, técnica e segurança. ${analysis.progressaoSemanal}`;
+  return `Ciclo semanal objetivo para execução imediata, com foco em consistência, técnica e segurança. ${levelGuidance} ${analysis.progressaoSemanal}`;
 }
 
 function toDisplayName(value: string | undefined): string {
@@ -556,6 +748,11 @@ function buildAjusteObjetivo(profile: ClientProfile, analysis: WorkoutAnalysis):
 function buildStrategy(profile: ClientProfile, analysis: WorkoutAnalysis, blocks: WorkoutBlock[]): string {
   const focus = getFocusGroup(profile);
   const emphasisText = focus ? ` Ênfase aplicada: ${focus}.` : "";
+  const levelProgressionText = profile.nivel === "intermediario"
+    ? " Intermediária: manter base moderada com progressão para moderada-alta ao longo dos ciclos mensais quando houver boa execução e recuperação."
+    : profile.nivel === "avancado"
+      ? " Avançada: treino mais pesado como padrão, com técnicas avançadas aplicadas de forma estratégica quando clinicamente permitido."
+      : "";
   const risks = detectRegionalRisks(profile);
   const regionalGuidance: string[] = [];
 
@@ -577,7 +774,7 @@ function buildStrategy(profile: ClientProfile, analysis: WorkoutAnalysis, blocks
       ? ` ${regionalGuidance[0]}`
       : ` Prioridades clínicas: ${regionalGuidance.join(" ")}`;
 
-  return `A divisão com ${blocks.length} treinos foi escolhida para equilibrar objetivo, nível ${profile.nivel}, periodicidade ${profile.periodicidade || "semanal"} e segurança clínica. O plano prioriza recuperação coerente, exercícios reais de academia e progressão compatível com ${analysis.nivelRisco === "alto" ? "maior cautela clínica" : "boa margem de evolução"}.${emphasisText}${guidanceText}`;
+  return `A divisão com ${blocks.length} treinos foi escolhida para equilibrar objetivo, nível ${profile.nivel}, periodicidade ${profile.periodicidade || "semanal"} e segurança clínica. O plano prioriza recuperação coerente, exercícios reais de academia e progressão compatível com ${analysis.nivelRisco === "alto" ? "maior cautela clínica" : "boa margem de evolução"}.${emphasisText}${levelProgressionText}${guidanceText}`;
 }
 
 function buildObservacoesFinais(analysis: WorkoutAnalysis): string {

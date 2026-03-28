@@ -64,10 +64,14 @@ O nível declarado define obrigatoriamente a faixa de carga base da ficha. Restr
   cliente sem hábito de pegar peso, sem técnica consolidada e sem experiência de execução. Começar obrigatoriamente com cargas leves, foco em mobilidade, postura, técnica de execução, consciência corporal e adaptação neuromuscular. Progressão lenta e segura.
 
 - Intermediária:
-  cliente que já treina há algum tempo, tem base técnica e já carrega peso moderado com segurança. Usar cargas moderadas desde o início, progressão consistente, divisão mais estruturada. Ao longo do ciclo, pode evoluir gradualmente para cargas mais desafiadoras conforme a execução permitir.
+  cliente que já treina há algum tempo, tem base técnica, mobilidade funcional e já carrega peso moderado com segurança. Usar cargas moderadas desde o início, progressão consistente e divisão mais estruturada.
+  Em ciclos quinzenais e mensais, a progressão deve ser clara: começar em moderada e evoluir para moderada-alta conforme técnica e recuperação permitirem.
+  Em evolução de meses consecutivos (com boa aderência e sem dor), pode migrar para padrão avançado de treino.
 
 - Avançada:
-  cliente com experiência sólida, técnica consolidada, mobilidade adequada e histórico real de treino intenso. OBRIGATÓRIO prescrever cargas pesadas desde o início da ficha. Divisão mais sofisticada, maior volume e uso de técnicas de intensificação como prática padrão — não como exceção. A evolução se dá pelo aumento progressivo de carga e pela aplicação estratégica de técnicas avançadas (bi-set, tri-set, drop-set, rest-pause) ao longo do ciclo.
+  cliente com experiência sólida, técnica consolidada, mobilidade adequada e força construída em treino regular. OBRIGATÓRIO prescrever cargas pesadas desde o início da ficha quando o contexto clínico permitir.
+  Divisão mais sofisticada, maior volume e uso de técnicas de intensificação como prática padrão — não como exceção.
+  Em ciclos mensais, manter estímulo pesado desde a semana 1 e aplicar técnicas avançadas de forma estratégica (bi-set, tri-set, drop-set, rest-pause) com controle de recuperação.
 
 ========================================
 4. PRIORIDADE CLÍNICA E SEGURANÇA
@@ -141,6 +145,10 @@ A periodicidade deve influenciar a estratégia:
 
 - Mensal:
   ficha pensada para 4 semanas, com progressão gradual e simples ao longo do ciclo.
+  regra por nível no ciclo mensal:
+  iniciantes: adaptação técnica e consistência, sem técnicas avançadas.
+  intermediárias: iniciar em carga moderada e evoluir para moderada-alta nas semanas 2 e 3 quando houver execução limpa.
+  avançadas: iniciar pesado desde a semana 1 e manter progressão de carga com técnicas avançadas quando clinicamente permitido.
 
 IMPORTANTE:
 - não criar periodização excessivamente complexa
@@ -152,34 +160,74 @@ IMPORTANTE:
 ========================================
 
 Avaliar os dias que a cliente quer treinar junto com idade, nível, IMC, objetivo e risco clínico.
+Seguir OBRIGATORIAMENTE a estrutura de divisão abaixo conforme o número de dias declarado.
 
-Divisões esperadas:
+REGRAS GLOBAIS (válidas para qualquer divisão):
+- NUNCA repetir o mesmo exercício em mais de um treino da mesma semana
+- Panturrilhas nos dias de inferiores apenas quando necessário e fizer sentido para o perfil
+- Nos dias de superiores, incluir abdômen e/ou cardio de forma variada
+- Glúteos e posteriores de coxa são SEMPRE treinos distintos — nunca juntos com volume igual
+
+========================================
+ESTRUTURAS OBRIGATÓRIAS POR FREQUÊNCIA
+========================================
 
 2x por semana:
-- 1 dia de membros inferiores completos
-- 1 dia de membros superiores completos
+  Treino A: membros inferiores completos (quadríceps, glúteos, posteriores de coxa — panturrilhas quando necessário)
+  Treino B: membros inferiores completos (mesma lógica, variando exercícios em relação ao Treino A)
+
+  PROIBIDO para 2x:
+    Usar superiores em nenhum dos dias — foco total em inferiores.
 
 3x por semana:
-- alternar inferiores, superiores e complemento estratégico
+  Treino A: quadríceps (cadeira extensora, leg press, agachamento guiado, panturrilha quando necessário)
+  Treino B: superiores completo (costas, peito, ombros — adicionar abdômen ou cardio ao final)
+  Treino C: glúteos + posteriores de coxa (elevação pélvica, coice, abdução, mesa flexora, cadeira flexora)
+
+  PROIBIDO para 3x:
+    Repetir exercícios do Treino A no C, ou do Treino B em qualquer outro dia.
 
 4x por semana:
-- divisão mais específica entre inferiores e superiores
+  Treino A: quadríceps (cadeira extensora, leg press, agachamento guiado — panturrilhas quando necessário)
+  Treino B: costas + abdômen (puxada, remada, pulldown, face pull, abdominal, prancha)
+  Treino C: glúteos + posteriores de coxa (elevação pélvica, glute bridge, coice, abdução, mesa flexora, cadeira flexora)
+  Treino D: peito + ombros + abdômen ou cardio (supino máquina, crucifixo, desenvolvimento, elevação lateral, rosca ou tríceps)
+
+  EXEMPLO CORRETO para 4x:
+    Treino A: cadeira extensora, leg press, agachamento guiado, panturrilha em pé, panturrilha sentada
+    Treino B: puxada na frente, remada baixa, pulldown, face pull, prancha, abdominal infra
+    Treino C: elevação pélvica, glute bridge, coice na polia, abdução de quadril, mesa flexora, cadeira flexora
+    Treino D: supino máquina, crucifixo máquina, desenvolvimento com halteres, elevação lateral, tríceps polia + cardio leve
+
+  PROIBIDO para 4x:
+    Treino B e Treino D com os mesmos exercícios  <-- ERRADO: costas+peito no mesmo dia ou dois dias iguais
+    Treino C misturando glúteos+posteriores com lista igual  <-- ERRADO, mas aqui os dois grupamentos podem compartilhar treino em 4x desde que glúteos sejam ênfase (mais exercícios de glúteo do que de posterior)
+    Repetir puxada, remada ou pulldown em mais de um treino na semana
 
 5x por semana:
-- divisão por grupamentos ou ênfases complementares, com recuperação coerente
+  Treino A: quadríceps + panturrilhas (cadeira extensora, leg press, agachamento guiado, panturrilha em pé, panturrilha sentada)
+  Treino B: costas + abdômen (puxada, remada, pulldown, face pull, abdominal máquina, prancha)
+  Treino C: glúteos + panturrilhas (elevação pélvica, glute bridge, coice na polia, abdução de quadril, agachamento sumo, panturrilha sentada)
+  Treino D: peito + ombros + cardio (supino máquina, crucifixo máquina, desenvolvimento, elevação lateral, face pull + cardio)
+  Treino E: posteriores de coxa + panturrilhas (stiff, mesa flexora, cadeira flexora, levantamento romeno, panturrilha em pé)
+
+  PROIBIDO para 5x:
+    Juntar glúteos e posteriores de coxa no mesmo treino — cada um tem dia próprio
+    Repetir qualquer exercício já usado em outro treino da semana
+    Usar panturrilha em todos os dias — distribuir em A, C e E apenas
 
 6x por semana:
-- divisão avançada, apenas se o perfil realmente suportar
+  Divisão avançada, apenas se o perfil realmente suportar.
+  Treino A: quadríceps + panturrilhas
+  Treino B: costas + abdômen
+  Treino C: glúteos
+  Treino D: peito + ombros + cardio
+  Treino E: posteriores de coxa + panturrilhas
+  Treino F: braços (bíceps, tríceps) + abdômen ou mobilidade
 
-Distribuição muscular base:
-- membros inferiores: quadríceps, glúteos, posteriores, panturrilhas
-- membros superiores: costas, peito, ombros, abdômen
-- complementar com cardio e funcional quando fizer sentido
-
-Evitar:
-- excesso de dias para iniciantes
-- excesso de volume para obesas com limitação articular
-- sessões pesadas de inferiores em dias seguidos sem lógica de recuperação
+  PROIBIDO para 6x:
+    Repetir qualquer exercício em mais de um treino
+    Glúteos e posteriores no mesmo dia
 
 ========================================
 8. FOCO FEMININO E ÊNFASE MUSCULAR
@@ -287,6 +335,7 @@ Regras obrigatórias:
 - não inventar nomes irreais
 - não usar exercícios avançados desnecessários para iniciantes
 - quando um exercício exigir adaptação, oferecer substituição curta e útil
+- exercícios isométricos como prancha e variações de isometria devem ter "repeticoes" em formato de tempo, ex: "30 a 45 segundos" — nunca em número de repetições
 
 ========================================
 12. AQUECIMENTO, EXECUÇÃO E RECUPERAÇÃO
@@ -400,6 +449,9 @@ Regras rígidas para a ficha detalhada:
 - não montar ficha incoerente com os dias por semana
 - não esquecer hidratação, execução e recuperação quando relevantes
 - não esquecer a influência da periodicidade
+- NUNCA repetir o mesmo exercício em mais de um treino na mesma semana
+- NUNCA usar número de repetições para exercícios isométricos (prancha, isometria): usar obrigatoriamente tempo em segundos, ex: "30 a 45 segundos"
+- NUNCA misturar glúteos e posteriores de coxa no mesmo treino — independente do número de dias. Glúteos têm treino próprio; posteriores de coxa devem ser complemento em outro treino (ex: dia de peito ou dia de costas) ou ter treino próprio quando houver dias suficientes
 
 ========================================
 16. TÉCNICAS AVANÇADAS DE INTENSIFICAÇÃO
@@ -449,7 +501,7 @@ Regras para aplicação (INTERMEDIÁRIAS com foco + AVANÇADAS):
   extensora + leg press em bi-set para ênfase em quadríceps
 - evitar combinações sem sentido técnico ou que comprometam execução
 - se a técnica comprometer execução, segurança ou recuperação, não utilizar
-- PROIBIDO usar técnicas avançadas se houver comorbidade, risco articular alto, obesidade importante ou idade 60+
+- PROIBIDO usar técnicas avançadas se houver comorbidade, qualquer nível de risco articular identificado (moderado ou alto), obesidade importante ou idade 60+ — sem exceção, mesmo que a cliente tenha foco muscular ou seja intermediária/avançada
 
 Se usar técnica avançada:
 - explicar de forma curta e profissional na estratégia da ficha por que ela foi aplicada
@@ -511,11 +563,84 @@ Estrutura obrigatória:
 }
 
 Se não houver técnica avançada, omita o campo "tecnicaAvancada".
+
+ATENÇÃO ESPECIAL para o campo "repeticoes":
+- Para exercícios dinâmicos: usar número de repetições, ex: "8 a 12"
+- Para exercícios ISOMÉTRICOS (prancha, isometria de qualquer tipo): usar OBRIGATORIAMENTE tempo em segundos, ex: "30 a 45 segundos"
+  CORRETO:   { "nome": "Prancha", "series": 3, "repeticoes": "30 a 45 segundos", "carga": "peso corporal", "grupoMuscular": "abdomen" }
+  PROIBIDO:  { "nome": "Prancha", "series": 3, "repeticoes": "8 a 12", ... }  <-- ERRADO, prancha não tem repetições
+
+========================================
+CHECKLIST OBRIGATÓRIO — VERIFICAR ANTES DE RESPONDER
+========================================
+
+Antes de gerar o JSON final, confirme obrigatoriamente:
+
+[ ] A divisão de treinos segue EXATAMENTE a estrutura definida na seção 7 para o número de dias declarado.
+[ ] Nenhum exercício se repete em mais de um treino na semana.
+[ ] Exercícios isométricos (prancha) têm "repeticoes" em segundos, não em número.
+[ ] Técnicas avançadas só existem se o perfil permitir (nível avançado + risco baixo + foco declarado).
+[ ] Glúteos e posteriores de coxa nunca compartilham treino com volume igual.
+
+ESTRUTURA CORRETA POR FREQUÊNCIA (referência rápida):
+
+2x: A=inferiores completos | B=inferiores completos (exercícios diferentes)
+3x: A=quadríceps | B=superiores+abdômen | C=glúteos+posteriores
+4x: A=quadríceps | B=costas+abdômen | C=glúteos+posteriores | D=peito+ombros
+5x: A=quadríceps+panturrilha | B=costas+abdômen | C=glúteos+panturrilha | D=peito+ombros+cardio | E=posteriores+panturrilha
+6x: A=quadríceps+panturrilha | B=costas+abdômen | C=glúteos | D=peito+ombros+cardio | E=posteriores+panturrilha | F=braços+abdômen
+
+Se o número de dias for 5 e a estrutura gerada for diferente da linha "5x" acima, REESCREVA antes de responder.
 `;
 
 function normalizeDisplayValue(value: string | undefined, fallback: string): string {
   const normalized = value?.trim();
   return normalized ? normalized : fallback;
+}
+
+function buildMandatoryWeeklyStructure(dias: number): string {
+  const structures: Record<number, string> = {
+    2: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Treino A: membros inferiores completos (quadríceps, glúteos, posteriores — panturrilhas quando necessário)
+  Treino B: membros inferiores completos (mesma lógica, exercícios DIFERENTES do Treino A)
+  PROIBIDO: incluir superiores em qualquer dos 2 dias.`,
+
+    3: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Treino A: quadríceps + panturrilhas (cadeira extensora, leg press, agachamento guiado, panturrilha)
+  Treino B: superiores completo — costas, peito, ombros (puxada, remada, supino máquina, desenvolvimento, elevação lateral) + abdômen ao final
+  Treino C: glúteos + posteriores de coxa (elevação pélvica, glute bridge, coice na polia, abdução, mesa flexora, cadeira flexora)
+  PROIBIDO: misturar quadríceps com glúteos / costas com peito em dias separados / repetir exercícios entre treinos.`,
+
+    4: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Treino A: quadríceps + panturrilhas (cadeira extensora, leg press, agachamento guiado, panturrilha em pé, panturrilha sentada)
+  Treino B: costas + abdômen (puxada na frente, remada baixa, pulldown, face pull, abdominal, prancha)
+  Treino C: glúteos + posteriores de coxa (elevação pélvica, glute bridge, coice na polia, abdução, mesa flexora, cadeira flexora)
+  Treino D: peito + ombros (supino máquina, crucifixo máquina, desenvolvimento com halteres, elevação lateral, tríceps polia) + cardio ou abdômen ao final
+  PROIBIDO: costas e peito no mesmo treino / quadríceps e glúteos no mesmo treino / qualquer exercício repetido entre treinos.`,
+
+    5: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Treino A: quadríceps + panturrilhas (cadeira extensora, leg press, agachamento guiado, panturrilha em pé, panturrilha sentada)
+  Treino B: costas + abdômen (puxada na frente, remada baixa, pulldown na polia, face pull, abdominal máquina, prancha)
+  Treino C: glúteos + panturrilhas (elevação pélvica, glute bridge, coice na polia, abdução de quadril, agachamento sumo, panturrilha sentada)
+  Treino D: peito + ombros + cardio (supino máquina, crucifixo máquina, desenvolvimento com halteres, elevação lateral, face pull leve) + cardio ao final
+  Treino E: posteriores de coxa + panturrilhas (stiff, mesa flexora, cadeira flexora, levantamento romeno, panturrilha em pé)
+  PROIBIDO: glúteos e posteriores de coxa no mesmo treino / costas e peito no mesmo treino / quadríceps e glúteos no mesmo treino / qualquer exercício repetido entre treinos.`,
+
+    6: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Treino A: quadríceps + panturrilhas (cadeira extensora, leg press, agachamento guiado, panturrilha em pé, panturrilha sentada)
+  Treino B: costas + abdômen (puxada na frente, remada baixa, pulldown, face pull, abdominal, prancha)
+  Treino C: glúteos (elevação pélvica, glute bridge, coice na polia, abdução de quadril, agachamento sumo)
+  Treino D: peito + ombros + cardio (supino máquina, crucifixo máquina, desenvolvimento, elevação lateral) + cardio ao final
+  Treino E: posteriores de coxa + panturrilhas (stiff, mesa flexora, cadeira flexora, levantamento romeno, panturrilha em pé)
+  Treino F: braços + abdômen (rosca direta, rosca alternada, tríceps polia, tríceps testa, abdominal infra, abdominal máquina)
+  PROIBIDO: qualquer exercício repetido entre treinos / glúteos e posteriores no mesmo treino / costas e peito no mesmo treino.`,
+
+    7: `ESTRUTURA OBRIGATÓRIA PARA ${dias} DIAS:
+  Usar a mesma estrutura de 6 dias e adicionar 1 dia de mobilidade, alongamento ativo ou cardio leve como Treino G.
+  PROIBIDO: qualquer exercício repetido entre os treinos de força.`,
+  };
+
+  return structures[dias] ?? structures[5];
 }
 
 export function buildWorkoutPrompt(profile: ClientProfile, analysis: ProfileAnalysis): string {
@@ -526,6 +651,9 @@ export function buildWorkoutPrompt(profile: ClientProfile, analysis: ProfileAnal
   const ajusteObjetivo = analysis.mensagemAjuste
     ? `Sim. Houve ajuste/orientação adicional do sistema: ${analysis.mensagemAjuste}`
     : "Não houve ajuste adicional do sistema além da análise padrão.";
+
+  const diasEfetivos = analysis.diasTreinoAjustados ?? profile.diasSemana;
+  const estruturaSemanal = buildMandatoryWeeklyStructure(diasEfetivos);
 
   return `
 ${basePrompt}
@@ -544,6 +672,15 @@ DADOS DA CLIENTE
 - Periodicidade da ficha: ${periodicidade}
 - Foco de treino: ${focoTreino}
 - Observações extras: ${observacoes}
+
+========================================
+ESTRUTURA SEMANAL OBRIGATÓRIA
+========================================
+
+${estruturaSemanal}
+
+Esta estrutura é FECHADA. Monte os treinos exatamente com os grupamentos acima.
+Não inverta, não combine grupamentos diferentes dos indicados, não repita exercícios entre treinos.
 
 ========================================
 ANÁLISE PRÉVIA DO SISTEMA

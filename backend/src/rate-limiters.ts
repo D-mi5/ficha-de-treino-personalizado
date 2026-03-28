@@ -1,6 +1,14 @@
 import rateLimit from "express-rate-limit";
 import { logger } from "./logger.js";
 
+function isDevelopmentLocalRequest(ip: string | undefined): boolean {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return /^(::1|::ffff:127\.0\.0\.1|127\.0\.0\.1)$/i.test(String(ip || "").trim());
+}
+
 function buildRateLimiter(options: {
   windowMs: number;
   max: number;
@@ -12,6 +20,7 @@ function buildRateLimiter(options: {
     max: options.max,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => isDevelopmentLocalRequest(req.ip),
     handler: (req, res) => {
       logger.warn("rate_limit_triggered", {
         event: options.event,

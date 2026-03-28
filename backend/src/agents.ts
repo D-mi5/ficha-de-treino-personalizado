@@ -6,6 +6,7 @@ import { buildWorkoutPrompt } from "./prompt.js";
 import { ClientProfile, GenerationFallbackReason, WorkoutResponse } from "./types.js";
 import { workoutResponseSchema } from "./schemas.js";
 import { buildComplianceRetryInstruction } from "./workout-output-validator.js";
+import { CLINICAL_RULES } from "./clinical-rules.js";
 
 type AiProvider = "openai" | "gemini";
 
@@ -17,9 +18,9 @@ const IA_MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 800;
 const TRANSIENT_RETRY_BASE_DELAY_MS = 1200;
 const AI_SCHEMA_DEBUG = String(process.env.AI_SCHEMA_DEBUG || "").trim().toLowerCase() === "true";
-const MAX_ADVANCED_TECHNIQUES_PER_TRAINING = 2;
+const MAX_ADVANCED_TECHNIQUES_PER_TRAINING = 3;
 const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || 0.25);
-const AI_MAX_TOKENS = Number(process.env.AI_MAX_TOKENS || 2800);
+const AI_MAX_TOKENS = Number(process.env.AI_MAX_TOKENS || 5000);
 const AI_SYSTEM_PROMPT = [
   "Você é uma personal trainer sênior com foco em segurança clínica, prescrição feminina e resposta estruturada.",
   "Responda somente com JSON válido, sem markdown e sem texto fora do objeto.",
@@ -289,10 +290,28 @@ function normalizeWorkoutPlanCandidate(candidate: unknown): unknown {
   return normalizedPlan;
 }
 
+function hasClinicalBlockForTechniques(profile: ClientProfile, analysis: WorkoutResponse["analysis"]): boolean {
+  if (analysis.nivelRisco === "alto") return true;
+  if (profile.idade >= 60) return true;
+  if (analysis.imc >= CLINICAL_RULES.imcObesidade) return true;
+
+  const notes = (profile.observacoes || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  const hasArticularRisk = new RegExp(CLINICAL_RULES.riscoArticularPattern).test(notes);
+  const hasComorbidade = new RegExp(CLINICAL_RULES.comorbidadePattern).test(notes);
+
+  return hasArticularRisk || hasComorbidade;
+}
+
 function profileAllowsAdvancedTechniques(profile: ClientProfile, analysis: WorkoutResponse["analysis"]): boolean {
-  return profile.nivel === "avancado"
-    && (analysis.objetivoFinal === "hipertrofia" || analysis.objetivoFinal === "definicao")
-    && analysis.nivelRisco !== "alto";
+  if (profile.nivel === "iniciante") return false;
+  if (!profile.focoTreino || profile.focoTreino === "nenhum") return false;
+  if (analysis.objetivoFinal !== "hipertrofia" && analysis.objetivoFinal !== "definicao") return false;
+  if (hasClinicalBlockForTechniques(profile, analysis)) return false;
+  return true;
 }
 
 export function applyTechniqueSafetyGuards(response: WorkoutResponse, profile: ClientProfile): WorkoutResponse {
@@ -306,13 +325,17 @@ export function applyTechniqueSafetyGuards(response: WorkoutResponse, profile: C
     let preservedTechniques = 0;
 
     const exercicios = treino.exercicios.map((exercicio) => {
+      const cleanNome = canUseAdvancedTechniques
+        ? exercicio.nome
+        : exercicio.nome.replace(/\s*\([^)]*(?:bi-set|tri-set|drop-set|rest-pause|superserie|pir[aâ]mide|serie combinada)[^)]*\)/gi, "").trim();
+
       if (!exercicio.tecnicaAvancada) {
-        return exercicio;
+        return { ...exercicio, nome: cleanNome };
       }
 
       if (!canUseAdvancedTechniques) {
         const { tecnicaAvancada: _tecnicaAvancada, ...safeExercise } = exercicio;
-        return safeExercise;
+        return { ...safeExercise, nome: cleanNome };
       }
 
       preservedTechniques += 1;
